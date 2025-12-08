@@ -108,6 +108,45 @@
         box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 30px rgba(200, 80, 150, 0.6);
       }
 
+      /* Dice pips */
+      .pips {
+        width: 70%;
+        height: 70%;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        gap: 0.25rem;
+        align-items: center;
+        justify-items: center;
+      }
+
+      .pip {
+        width: 100%;
+        height: 100%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+      }
+
+      .pip::before {
+        content: '';
+        width: 0.6rem;
+        height: 0.6rem;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.95);
+        box-shadow: 0 0 8px rgba(255,255,255,0.12);
+        display: block;
+        opacity: 0;
+        transition: opacity 0.12s ease-in-out, transform 0.12s ease-in-out;
+        transform: scale(0.9);
+      }
+
+      .pip.active::before { opacity: 1; transform: scale(1); }
+
+      /* Dark pips for light faces */
+      .cube__face--white .pip::before { background: #222; box-shadow: 0 0 6px rgba(0,0,0,0.6); }
+
+
       @keyframes tumble {
         0% { transform: rotateX(0) rotateY(0) rotateZ(0); }
         25% { transform: rotateX(180deg) rotateY(90deg) rotateZ(45deg); }
@@ -450,32 +489,59 @@
         };
 
         // Die Component
-        const Die = ({ color, isRolling }) => {
-            const getTransform = (c) => {
-                const transforms = {
-                    red: 'rotateY(0deg)',
-                    blue: 'rotateY(90deg)',
-                    green: 'rotateY(-90deg)',
-                    yellow: 'rotateY(180deg)',
-                    white: 'rotateX(-90deg)',
-                    pink: 'rotateX(90deg)',
-                };
-                return transforms[c] || 'rotateY(0deg)';
-            };
-            return (
-                <div className="scene w-28 h-28 sm:w-40 sm:h-40">
-                    <div className={`cube ${isRolling ? 'is-spinning' : ''}`} style={{ transform: isRolling ? undefined : getTransform(color), '--translate-z': '4rem' }}>
-                        <div className="cube__face cube__face--red">R</div>
-                        <div className="cube__face cube__face--blue">B</div>
-                        <div className="cube__face cube__face--green">G</div>
-                        <div className="cube__face cube__face--yellow">Y</div>
-                        <div className="cube__face cube__face--white">W</div>
-                        <div className="cube__face cube__face--pink">P</div>
-                    </div>
-                    <style>{`@media (max-width: 640px) { .cube { --translate-z: 3rem; } }`}</style>
-                </div>
-            );
+      const Die = ({ color, isRolling }) => {
+        const getTransform = (c) => {
+          const transforms = {
+            red: 'rotateY(0deg)',
+            blue: 'rotateY(90deg)',
+            green: 'rotateY(-90deg)',
+            yellow: 'rotateY(180deg)',
+            white: 'rotateX(-90deg)',
+            pink: 'rotateX(90deg)',
+          };
+          return transforms[c] || 'rotateY(0deg)';
         };
+
+        const Face = ({ cls, pattern }) => (
+          <div className={`cube__face ${cls}`}>
+            <div className="pips">
+              {pattern.map((on, i) => (
+                <span key={i} className={`pip ${on ? 'active' : ''}`} />
+              ))}
+            </div>
+          </div>
+        );
+
+        // Patterns: 3x3 grid (left-to-right, top-to-bottom)
+        const patterns = {
+          // 1: center
+          one: [0,0,0,0,1,0,0,0,0],
+          // 2: top-left and bottom-right
+          two: [1,0,0,0,0,0,0,0,1],
+          // 3: like two + center
+          three: [1,0,0,0,1,0,0,0,1],
+          // 4: corners
+          four: [1,0,1,0,0,0,1,0,1],
+          // 5: four corners + center
+          five: [1,0,1,0,1,0,1,0,1],
+          // 6: left and right columns
+          six: [1,0,1,1,0,1,1,0,1]
+        };
+
+        return (
+          <div className="scene w-28 h-28 sm:w-40 sm:h-40">
+            <div className={`cube ${isRolling ? 'is-spinning' : ''}`} style={{ transform: isRolling ? undefined : getTransform(color), '--translate-z': '3.5rem' }}>
+              <Face cls="cube__face--red" pattern={patterns.one} />
+              <Face cls="cube__face--blue" pattern={patterns.two} />
+              <Face cls="cube__face--green" pattern={patterns.three} />
+              <Face cls="cube__face--yellow" pattern={patterns.four} />
+              <Face cls="cube__face--white" pattern={patterns.five} />
+              <Face cls="cube__face--pink" pattern={patterns.six} />
+            </div>
+            <style>{`@media (max-width: 640px) { .cube { --translate-z: 2rem; } }`}</style>
+          </div>
+        );
+      };
 
         // Main App
         const App = () => {
@@ -552,12 +618,12 @@
                             <h1 className="title-main mb-12">DICE GAME</h1>
                             <div className="glass-panel p-12 mb-8">
                                 <p className="subtitle-auth">DIGITAL CASINO PROTOCOL</p>
-                                <p className="text-sm text-cyan-300 mb-8">莎娅見 / dharls</p>
+                                <p className="text-sm text-cyan-300 mb-8">奎妲兒 / dharls</p>
                                 <button
-                                    onClick={() => setGameState('language')}
-                                    className="btn-cyber px-12 py-3 w-full text-lg"
+                                  onClick={() => setGameState('language')}
+                                  className="btn-cyber px-12 py-3 w-full text-lg"
                                 >
-                                    // LOGIN
+                                  LOGIN
                                 </button>
                                 <p className="text-xs text-cyan-300 mt-6 opacity-60">AUTHENTICATION REQUIRED</p>
                             </div>
@@ -571,16 +637,16 @@
                                 <h2 className="title-cyber mb-8">SELECT LANGUAGE</h2>
                                 <div className="flex gap-4 flex-col sm:flex-row">
                                     <button
-                                        onClick={() => { setLanguage('en'); setGameState('setup'); }}
-                                        className="btn-cyber flex-1"
+                                      onClick={() => { setLanguage('en'); setGameState('setup'); }}
+                                      className="btn-cyber flex-1"
                                     >
-                                        // LOGIN
+                                      {STRINGS.en.english}
                                     </button>
                                     <button
-                                        onClick={() => { setLanguage('zh'); setGameState('setup'); }}
-                                        className="btn-cyber flex-1"
+                                      onClick={() => { setLanguage('zh'); setGameState('setup'); }}
+                                      className="btn-cyber flex-1"
                                     >
-                                        // REGISTER
+                                      {STRINGS.zh.chinese}
                                     </button>
                                 </div>
                                 <p className="text-xs text-cyan-300 mt-6 opacity-60">SELECT ACCESS MODE</p>
@@ -612,7 +678,7 @@
                                             onClick={() => setGameState('language')}
                                             className="btn-cyber flex-1"
                                         >
-                                            // BACK
+                                            BACK
                                         </button>
                                         <button
                                             type="submit"
@@ -697,7 +763,7 @@
                                         disabled={!selectedColor}
                                         className="btn-cyber w-full text-lg py-3"
                                     >
-                                        // ROLL DICE
+                                        ROLL DICE
                                     </button>
                                 )}
 
@@ -729,7 +795,7 @@
                                         onClick={playAgain}
                                         className="btn-cyber flex-1"
                                     >
-                                        // PLAY AGAIN
+                                        PLAY AGAIN
                                     </button>
                                     <button
                                         onClick={() => { setGameState('language'); setLanguage(null); }}
