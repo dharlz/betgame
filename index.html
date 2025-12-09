@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Color Dice Game</title>
+    <title>BET-0-BET</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Use Inter for body and Orbitron for headings -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
       * {
-        font-family: 'Rajdhani', monospace;
+        font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       }
 
       body {
@@ -42,23 +43,28 @@
 
       /* 3D Dice with Gradient */
       .scene { 
-        perspective: 1200px; 
+        perspective: 2000px; 
         display: flex; 
         justify-content: center; 
         align-items: center; 
       }
 
       .cube { 
+        --translate-z: 48px; /* fallback until JS calculates exact half-width */
         width: 100%; 
         height: 100%; 
         position: relative; 
         transform-style: preserve-3d; 
+        transform-origin: 50% 50%;
         transition: transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         filter: drop-shadow(0 0 30px rgba(0, 255, 255, 0.6));
+        transform: translateZ(500px);
       }
       
       .cube__face {
         position: absolute; 
+        top: 0;
+        left: 0;
         width: 100%; 
         height: 100%;
         border: 3px solid #00ffff;
@@ -72,39 +78,38 @@
         color: white; 
         text-shadow: 0 0 15px rgba(0, 0, 0, 0.9);
         box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 25px rgba(0, 255, 255, 0.4);
-        backface-visibility: hidden;
       }
       
       .cube__face--red    { 
         background: linear-gradient(135deg, #cc1111, #881111); 
-        transform: rotateY(0deg) translateZ(var(--translate-z)); 
+        transform: rotateY(0deg) translateZ(var(--translate-z));
         box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 30px rgba(200, 50, 50, 0.6);
       }
       .cube__face--blue   { 
         background: linear-gradient(135deg, #1166dd, #0044aa); 
-        transform: rotateY(90deg) translateZ(var(--translate-z)); 
+        transform: rotateY(90deg) translateZ(var(--translate-z));
         box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 30px rgba(100, 150, 255, 0.6);
       }
       .cube__face--yellow { 
         background: linear-gradient(135deg, #ccaa00, #998800); 
-        transform: rotateY(180deg) translateZ(var(--translate-z)); 
+        transform: rotateY(180deg) translateZ(var(--translate-z));
         color: #222;
         box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 30px rgba(200, 180, 50, 0.6);
       }
       .cube__face--green  { 
         background: linear-gradient(135deg, #11aa44, #008833); 
-        transform: rotateY(-90deg) translateZ(var(--translate-z)); 
+        transform: rotateY(-90deg) translateZ(var(--translate-z));
         box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 30px rgba(100, 200, 100, 0.6);
       }
       .cube__face--white  { 
         background: linear-gradient(135deg, #dddddd, #aaaaaa); 
-        transform: rotateX(90deg) translateZ(var(--translate-z)); 
+        transform: rotateX(90deg) translateZ(var(--translate-z));
         color: #222; 
         box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 30px rgba(200, 200, 200, 0.6);
       }
       .cube__face--pink   { 
         background: linear-gradient(135deg, #dd1188, #aa0055); 
-        transform: rotateX(-90deg) translateZ(var(--translate-z)); 
+        transform: rotateX(-90deg) translateZ(var(--translate-z));
         box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 30px rgba(200, 80, 150, 0.6);
       }
 
@@ -163,15 +168,63 @@
       }
 
       .title-main {
-        font-family: 'Orbitron', cursive;
+        font-family: 'Orbitron', sans-serif;
         font-weight: 900;
-        letter-spacing: 8px;
-        font-size: clamp(2.5rem, 12vw, 6rem);
+        letter-spacing: 6px;
+        font-size: clamp(3rem, 10vw, 6.5rem);
         text-transform: uppercase;
-        color: #ffffff;
-        text-shadow: 3px 3px 0 #00ffff, 6px 6px 0 rgba(0, 255, 255, 0.4);
+        background: linear-gradient(90deg, #00f0ff, #66ffda, #00aaff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        text-shadow: 0 6px 18px rgba(0,255,255,0.08), 0 0 30px rgba(0, 170, 255, 0.25);
         transform: skewY(-2deg);
       }
+
+      /* Logo + header */
+      .logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+      }
+
+      .logo-svg {
+        filter: drop-shadow(0 0 12px rgba(0, 255, 255, 0.5));
+        width: 72px;
+        height: 72px;
+        flex: 0 0 72px;
+      }
+
+      .logo-title {
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 900;
+        font-size: clamp(2rem, 8vw, 3.2rem);
+        letter-spacing: 6px;
+        text-transform: uppercase;
+        background: linear-gradient(90deg, #00ffff, #66ffda, #99ffff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        text-shadow: 0 4px 24px rgba(0,255,255,0.12);
+        line-height: 1;
+      }
+
+      .logo-tag {
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 0.75rem;
+        letter-spacing: 2px;
+        color: #a6fff6;
+        opacity: 0.9;
+      }
+
+      @keyframes neonPulse {
+        0% { text-shadow: 0 0 6px rgba(0,255,255,0.12); }
+        50% { text-shadow: 0 0 22px rgba(0,255,255,0.55); }
+        100% { text-shadow: 0 0 6px rgba(0,255,255,0.12); }
+      }
+
+      .logo-title { animation: neonPulse 2.4s ease-in-out infinite; }
 
       .title-cyber {
         font-family: 'Orbitron', cursive;
@@ -218,7 +271,7 @@
         background: rgba(0, 0, 0, 0.7);
         border: 2px solid #00ffff;
         color: #00ffff;
-        font-family: 'Orbitron', cursive;
+        font-family: 'Orbitron', sans-serif;
         font-weight: 700;
         font-size: 0.9rem;
         letter-spacing: 2px;
@@ -408,54 +461,76 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef } = React;
 
-        // Language Strings
+        // Language Strings (English + Chinese)
         const STRINGS = {
-            en: {
-                title: 'DICE GAME',
-                selectLanguage: 'Select Language',
-                english: 'English',
-                chinese: '中文',
-                play: 'PLAY GAME',
-                playerName: 'Enter Your Name',
-                start: 'START GAME',
-                cancel: 'CANCEL',
-                trial: 'Trial',
-                selectColor: 'Select a Color',
-                roll: 'ROLL DICE',
-                correct: '✓ CORRECT! YOU WON!',
-                incorrect: '✗ WRONG COLOR!',
-                next: 'Next Trial',
-                gameOver: 'GAME OVER',
-                finalScore: 'FINAL SCORE',
-                wins: 'Wins',
-                playAgain: 'Play Again',
-                logout: 'Main Menu',
-                outOf: 'of 3'
-            },
-            zh: {
-                title: '色子遊戲',
-                selectLanguage: '選擇語言',
-                english: 'English',
-                chinese: '中文',
-                play: '玩遊戲',
-                playerName: '輸入你的名字',
-                start: '開始遊戲',
-                cancel: '取消',
-                trial: '試試',
-                selectColor: '選擇一個顏色',
-                roll: '擲骰子',
-                correct: '✓ 正確！你贏了！',
-                incorrect: '✗ 錯誤的顏色！',
-                next: '下一個試試',
-                gameOver: '遊戲結束',
-                finalScore: '最終分數',
-                wins: '勝',
-                playAgain: '再玩一次',
-                logout: '主菜單',
-                outOf: '共 3 個'
-            }
+          en: {
+            title: 'BET-0-BET',
+            selectLanguage: 'Select Language',
+            english: 'English',
+            chinese: '中文',
+            play: 'Play Game',
+            playerName: 'Enter Your Name',
+            start: 'Start Game',
+            cancel: 'Cancel',
+            trial: 'Trial',
+            selectColor: 'Select a Color',
+            roll: 'Roll Dice',
+            correct: '✓ Correct — You won!',
+            incorrect: '✗ Wrong color!',
+            next: 'Next Trial',
+            gameOver: 'Game Over',
+            finalScore: 'Final Score',
+            wins: 'Wins',
+            playAgain: 'Play Again',
+            logout: 'Main Menu',
+            outOf: 'of 3',
+            login: 'Log In',
+            howToPlayButton: 'How To Play',
+            connect: 'Connect',
+            back: 'Back',
+            close: 'Close',
+            howToPlayTitle: 'How To Play',
+            howToPlay1: 'Enter your user ID and connect.',
+            howToPlay2: 'Select a color to bet on.',
+            howToPlay3: 'Press ROLL to tumble the die.',
+            howToPlay4: 'If the die lands on your color you win the trial.',
+            howToPlay5: 'Play 3 trials to get your final score.'
+          },
+          zh: {
+            title: 'BET-0-BET',
+            selectLanguage: '選擇語言',
+            english: 'English',
+            chinese: '中文',
+            play: '玩遊戲',
+            playerName: '輸入你的名字',
+            start: '開始遊戲',
+            cancel: '取消',
+            trial: '試試',
+            selectColor: '選擇一個顏色',
+            roll: '擲骰子',
+            correct: '✓ 正確！你贏了！',
+            incorrect: '✗ 錯誤的顏色！',
+            next: '下一個試試',
+            gameOver: '遊戲結束',
+            finalScore: '最終分數',
+            wins: '勝',
+            playAgain: '再玩一次',
+            logout: '主菜單',
+            outOf: '共 3 個',
+            login: '登入',
+            howToPlayButton: '遊戲說明',
+            connect: '連接',
+            back: '返回',
+            close: '關閉',
+            howToPlayTitle: '遊戲說明',
+            howToPlay1: '輸入您的使用者ID並連接。',
+            howToPlay2: '選擇您要下注的顏色。',
+            howToPlay3: '按擲骰子以滾動色子。',
+            howToPlay4: '如果色子停在您選擇的顏色，您贏得該回合。',
+            howToPlay5: '進行 3 個回合以獲得最終分數。'
+          }
         };
 
         const COLORS = ['red', 'blue', 'green', 'yellow', 'white', 'pink'];
@@ -474,6 +549,12 @@
             zh: { red: '紅', blue: '藍', green: '綠', yellow: '黃', white: '白', pink: '粉紅' }
         };
 
+        // Language selection display options (English + Chinese only)
+        const LANGUAGE_OPTIONS = [
+          { code: 'en', label: 'English' },
+          { code: 'zh', label: '中文' }
+        ];
+
         // Particle Effect
         const createParticle = (x, y) => {
             const particle = document.createElement('div');
@@ -489,17 +570,19 @@
         };
 
         // Die Component
-      const Die = ({ color, isRolling }) => {
-        const getTransform = (c) => {
-          const transforms = {
-            red: 'rotateY(0deg)',
-            blue: 'rotateY(90deg)',
-            green: 'rotateY(-90deg)',
-            yellow: 'rotateY(180deg)',
-            white: 'rotateX(-90deg)',
-            pink: 'rotateX(90deg)',
+      const Die = ({ color, isRolling, targetColor, duration = 2400 }) => {
+        const cubeRef = useRef(null);
+        const finalAngles = (c) => {
+          // return { x: deg, y: deg }
+          const map = {
+            red: { x: 0, y: 0 },
+            blue: { x: 0, y: 90 },
+            green: { x: 0, y: -90 },
+            yellow: { x: 0, y: 180 },
+            white: { x: -90, y: 0 },
+            pink: { x: 90, y: 0 }
           };
-          return transforms[c] || 'rotateY(0deg)';
+          return map[c] || { x: 0, y: 0 };
         };
 
         const Face = ({ cls, pattern }) => (
@@ -514,23 +597,58 @@
 
         // Patterns: 3x3 grid (left-to-right, top-to-bottom)
         const patterns = {
-          // 1: center
           one: [0,0,0,0,1,0,0,0,0],
-          // 2: top-left and bottom-right
           two: [1,0,0,0,0,0,0,0,1],
-          // 3: like two + center
           three: [1,0,0,0,1,0,0,0,1],
-          // 4: corners
           four: [1,0,1,0,0,0,1,0,1],
-          // 5: four corners + center
           five: [1,0,1,0,1,0,1,0,1],
-          // 6: left and right columns
           six: [1,0,1,1,0,1,1,0,1]
         };
 
+        // compute transform and transition
+        const computeSpin = (target) => {
+          const final = finalAngles(target);
+          // random full rotations for tumble
+          const fullX = 360 * (2 + Math.floor(Math.random() * 3));
+          const fullY = 360 * (2 + Math.floor(Math.random() * 3));
+          const offsetX = (Math.random() - 0.5) * 60; // +-30deg
+          const offsetY = (Math.random() - 0.5) * 60;
+          const spinX = final.x + fullX + offsetX;
+          const spinY = final.y + fullY + offsetY;
+          return { spinX, spinY };
+        };
+
+        // choose transform depending on rolling
+        let transformStyle = '';
+        let transitionStyle = undefined;
+
+        if (isRolling && targetColor) {
+          const { spinX, spinY } = computeSpin(targetColor);
+          transformStyle = `rotateX(${spinX}deg) rotateY(${spinY}deg)`;
+          transitionStyle = `transform ${duration}ms cubic-bezier(0.22, 0.9, 0.28, 1)`;
+        } else {
+          const final = finalAngles(color);
+          transformStyle = `rotateX(${final.x}deg) rotateY(${final.y}deg)`;
+          transitionStyle = 'transform 600ms ease-out';
+        }
+
+        // dynamically set translateZ to half the cube width (in px) so faces form a cube
+        useEffect(() => {
+          const updateTranslate = () => {
+            const node = cubeRef.current;
+            if (!node) return;
+            const w = node.getBoundingClientRect().width;
+            // set half width (px) as translateZ
+            node.style.setProperty('--translate-z', `${Math.round(w / 2)}px`);
+          };
+          updateTranslate();
+          window.addEventListener('resize', updateTranslate);
+          return () => window.removeEventListener('resize', updateTranslate);
+        }, []);
+
         return (
-          <div className="scene w-28 h-28 sm:w-40 sm:h-40">
-            <div className={`cube ${isRolling ? 'is-spinning' : ''}`} style={{ transform: isRolling ? undefined : getTransform(color), '--translate-z': '3.5rem' }}>
+          <div className="scene w-80 h-80 sm:w-96 sm:h-96">
+            <div ref={cubeRef} className="cube" style={{ transform: transformStyle, transition: transitionStyle }}>
               <Face cls="cube__face--red" pattern={patterns.one} />
               <Face cls="cube__face--blue" pattern={patterns.two} />
               <Face cls="cube__face--green" pattern={patterns.three} />
@@ -538,7 +656,7 @@
               <Face cls="cube__face--white" pattern={patterns.five} />
               <Face cls="cube__face--pink" pattern={patterns.six} />
             </div>
-            <style>{`@media (max-width: 640px) { .cube { --translate-z: 2rem; } }`}</style>
+            <style>{`@media (max-width: 640px) { .cube { --translate-z: 48px; } }`}</style>
           </div>
         );
       };
@@ -547,12 +665,15 @@
         const App = () => {
             const [language, setLanguage] = useState(null);
             const [playerName, setPlayerName] = useState('');
+            const [showHelp, setShowHelp] = useState(false);
             const [gameState, setGameState] = useState('splash');
             const [trialCount, setTrialCount] = useState(0);
             const [wins, setWins] = useState(0);
             const [selectedColor, setSelectedColor] = useState(null);
             const [diceResult, setDiceResult] = useState('red');
             const [isRolling, setIsRolling] = useState(false);
+            const [targetColor, setTargetColor] = useState(null);
+            const rollDuration = 2400; // ms
             const [message, setMessage] = useState('');
             const [lastResult, setLastResult] = useState(null);
 
@@ -569,25 +690,29 @@
             };
 
             const handleRoll = () => {
-                if (!selectedColor || isRolling) return;
-                setIsRolling(true);
-                setMessage('');
-                
-                setTimeout(() => {
-                    const randomColor = COLORS[Math.floor(Math.random() * COLORS.length)];
-                    setDiceResult(randomColor);
-                    setIsRolling(false);
+              if (!selectedColor || isRolling) return;
+              // choose outcome immediately, animate to it, then reveal
+              const randomColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+              setTargetColor(randomColor);
+              setIsRolling(true);
+              setMessage('');
 
-                    if (randomColor === selectedColor) {
-                        setWins(wins + 1);
-                        setLastResult('win');
-                        setMessage(t('correct'));
-                        createParticle(window.innerWidth / 2, window.innerHeight / 2);
-                    } else {
-                        setLastResult('lose');
-                        setMessage(t('incorrect'));
-                    }
-                }, 2500);
+              // finalize after animation
+              setTimeout(() => {
+                setDiceResult(randomColor);
+                setIsRolling(false);
+                setTargetColor(null);
+
+                if (randomColor === selectedColor) {
+                  setWins(wins + 1);
+                  setLastResult('win');
+                  setMessage(t('correct'));
+                  createParticle(window.innerWidth / 2, window.innerHeight / 2);
+                } else {
+                  setLastResult('lose');
+                  setMessage(t('incorrect'));
+                }
+              }, rollDuration + 100);
             };
 
             const nextTrial = () => {
@@ -615,43 +740,120 @@
                     {/* Splash Screen */}
                     {gameState === 'splash' && (
                         <div className="text-center w-full max-w-4xl">
-                            <h1 className="title-main mb-12">DICE GAME</h1>
-                            <div className="glass-panel p-12 mb-8">
-                                <p className="subtitle-auth">DIGITAL CASINO PROTOCOL</p>
-                                <p className="text-sm text-cyan-300 mb-8">奎妲兒 / dharls</p>
-                                <button
-                                  onClick={() => setGameState('language')}
-                                  className="btn-cyber px-12 py-3 w-full text-lg"
-                                >
-                                  LOGIN
-                                </button>
+                            <div className="logo mb-6">
+                                <svg className="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                                  <defs>
+                                    <linearGradient id="g1" x1="0" x2="1">
+                                      <stop offset="0%" stop-color="#00f0ff" />
+                                      <stop offset="50%" stop-color="#66ffda" />
+                                      <stop offset="100%" stop-color="#00aaff" />
+                                    </linearGradient>
+                                  </defs>
+                                  <g fill="none" stroke="url(#g1)" stroke-width="4" stroke-linejoin="round">
+                                    <polygon points="50,6 88,28 88,72 50,94 12,72 12,28" fill="rgba(0,255,255,0.04)" />
+                                    <path d="M50 22 L66 50 L50 78 L34 50 Z" fill="url(#g1)" opacity="0.08"/>
+                                  </g>
+                                  <circle cx="50" cy="50" r="28" stroke="url(#g1)" stroke-width="1" fill="rgba(0,255,255,0.02)" />
+                                </svg>
+                                <div>
+                                  <div className="logo-title">BET-0-BET</div>
+                                  <div className="logo-tag">NEON CHALLENGE</div>
+                                </div>
+                            </div>
+                            <div className="glass-panel p-8 mb-6">
+                                <p className="text-sm text-cyan-300 mb-6">奎妲兒 / dharls</p>
+                                <div className="flex gap-4">
+                                  <button
+                                    onClick={() => setGameState('language')}
+                                    className="btn-cyber px-8 py-2 flex-1 text-lg"
+                                  >
+                                    {STRINGS[language || 'en'].start}
+                                  </button>
+                                  <button
+                                    onClick={() => setShowHelp(true)}
+                                    className="btn-cyber px-8 py-2 flex-1 text-lg"
+                                  >
+                                    {STRINGS[language || 'en'].howToPlayButton}
+                                  </button>
+                                </div>
                                 <p className="text-xs text-cyan-300 mt-6 opacity-60">AUTHENTICATION REQUIRED</p>
                             </div>
+
+                            {/* Help overlay */}
+                            {showHelp && (
+                              <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+                                <div className="glass-panel p-8 w-full max-w-lg">
+                                  <h3 className="title-cyber mb-4">{STRINGS[language || 'en'].howToPlayTitle}</h3>
+                                  <div className="text-left space-y-4 mb-6">
+                                    <div>
+                                      <div className="font-semibold">1. {STRINGS.en.howToPlay1}</div>
+                                      <div className="text-sm text-cyan-200 mt-1">{STRINGS.zh.howToPlay1}</div>
+                                    </div>
+                                    <div>
+                                      <div className="font-semibold">2. {STRINGS.en.howToPlay2}</div>
+                                      <div className="text-sm text-cyan-200 mt-1">{STRINGS.zh.howToPlay2}</div>
+                                    </div>
+                                    <div>
+                                      <div className="font-semibold">3. {STRINGS.en.howToPlay3}</div>
+                                      <div className="text-sm text-cyan-200 mt-1">{STRINGS.zh.howToPlay3}</div>
+                                    </div>
+                                    <div>
+                                      <div className="font-semibold">4. {STRINGS.en.howToPlay4}</div>
+                                      <div className="text-sm text-cyan-200 mt-1">{STRINGS.zh.howToPlay4}</div>
+                                    </div>
+                                    <div>
+                                      <div className="font-semibold">5. {STRINGS.en.howToPlay5}</div>
+                                      <div className="text-sm text-cyan-200 mt-1">{STRINGS.zh.howToPlay5}</div>
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-4">
+                                    <button onClick={() => setShowHelp(false)} className="btn-cyber flex-1">{STRINGS[language || 'en'].close}</button>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                         </div>
                     )}
 
                     {/* Language Selection */}
                     {gameState === 'language' && (
-                        <div className="w-full max-w-2xl">
-                            <div className="glass-panel p-12 text-center">
-                                <h2 className="title-cyber mb-8">SELECT LANGUAGE</h2>
-                                <div className="flex gap-4 flex-col sm:flex-row">
-                                    <button
-                                      onClick={() => { setLanguage('en'); setGameState('setup'); }}
-                                      className="btn-cyber flex-1"
-                                    >
-                                      {STRINGS.en.english}
-                                    </button>
-                                    <button
-                                      onClick={() => { setLanguage('zh'); setGameState('setup'); }}
-                                      className="btn-cyber flex-1"
-                                    >
-                                      {STRINGS.zh.chinese}
-                                    </button>
-                                </div>
-                                <p className="text-xs text-cyan-300 mt-6 opacity-60">SELECT ACCESS MODE</p>
-                            </div>
+                      <div className="w-full max-w-2xl">
+                        <div className="glass-panel p-12 text-center">
+                          <h2 className="title-cyber mb-8">SELECT LANGUAGE</h2>
+
+                          <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 max-w-sm mx-auto">
+                            {LANGUAGE_OPTIONS.map(opt => (
+                              <button
+                                key={opt.code}
+                                onClick={() => setLanguage(opt.code)}
+                                className={`btn-cyber py-3 ${language === opt.code ? 'ring-4 ring-cyan-300' : ''}`}
+                              >
+                                {opt.label}
+                              </button>
+                            ))}
+                          </div>
+
+                          <p className="text-xs text-cyan-300 mt-6 opacity-60">SELECT ACCESS MODE</p>
+
+                          <div className="flex gap-4 mt-6">
+                            <button
+                              type="button"
+                              onClick={() => { setGameState('splash'); setLanguage(null); }}
+                              className="btn-cyber flex-1"
+                            >
+                              {STRINGS[language]?.cancel || STRINGS.en.cancel}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { if (language) setGameState('setup'); }}
+                              disabled={!language}
+                              className="btn-cyber flex-1"
+                            >
+                              {STRINGS[language]?.start || STRINGS.en.start}
+                            </button>
+                          </div>
                         </div>
+                      </div>
                     )}
 
                     {/* Setup */}
@@ -678,14 +880,14 @@
                                             onClick={() => setGameState('language')}
                                             className="btn-cyber flex-1"
                                         >
-                                            BACK
+                                            {STRINGS[language]?.back || STRINGS.en.back}
                                         </button>
                                         <button
                                             type="submit"
                                             disabled={!playerName.trim()}
                                             className="btn-cyber flex-1"
                                         >
-                                            CONNECT SYSTEM
+                                            {STRINGS[language]?.connect || STRINGS.en.connect}
                                         </button>
                                     </div>
                                 </form>
@@ -721,8 +923,8 @@
 
                                 {/* Dice Display */}
                                 <div className="flex justify-center my-12 p-8 glass-panel">
-                                    <Die color={diceResult} isRolling={isRolling} />
-                                </div>
+                                <Die color={diceResult} isRolling={isRolling} targetColor={targetColor} duration={rollDuration} />
+                              </div>
 
                                 {/* Message */}
                                 {message && (
@@ -745,10 +947,10 @@
                                                     key={color}
                                                     onClick={() => setSelectedColor(color)}
                                                     className={`color-swatch aspect-square border-4 transition-all ${COLOR_TAILWIND[color]} ${selectedColor === color ? 'selected' : ''}`}
-                                                    title={COLOR_NAMES[language][color]}
+                                                      title={COLOR_NAMES[language]?.[color] || COLOR_NAMES.en[color]}
                                                 >
                                                     <span className="text-xs font-bold text-white drop-shadow-lg hidden sm:inline">
-                                                        {COLOR_NAMES[language][color].substring(0,1)}
+                                                      {(COLOR_NAMES[language]?.[color] || COLOR_NAMES.en[color]).substring(0,1)}
                                                     </span>
                                                 </button>
                                             ))}
@@ -763,7 +965,7 @@
                                         disabled={!selectedColor}
                                         className="btn-cyber w-full text-lg py-3"
                                     >
-                                        ROLL DICE
+                                        {STRINGS[language]?.roll || STRINGS.en.roll}
                                     </button>
                                 )}
 
@@ -795,7 +997,7 @@
                                         onClick={playAgain}
                                         className="btn-cyber flex-1"
                                     >
-                                        PLAY AGAIN
+                                        {STRINGS[language]?.playAgain || STRINGS.en.playAgain}
                                     </button>
                                     <button
                                         onClick={() => { setGameState('language'); setLanguage(null); }}
