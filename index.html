@@ -494,8 +494,8 @@
             howToPlayTitle: 'How To Play',
             howToPlay1: 'Enter your user ID and connect.',
             howToPlay2: 'Select a color to bet on.',
-            howToPlay3: 'Press ROLL to tumble the die.',
-            howToPlay4: 'If the die lands on your color you win the trial.',
+            howToPlay3: 'Press ROLL to tumble the dice.',
+            howToPlay4: 'If the dice lands on your color you win the trial.',
             howToPlay5: 'Play 3 trials to get your final score.'
           },
           zh: {
@@ -573,7 +573,7 @@
       const Die = ({ color, isRolling, targetColor, duration = 2400 }) => {
         const cubeRef = useRef(null);
         const finalAngles = (c) => {
-          // return { x: deg, y: deg }
+          // return {this x: deg, y: deg }
           const map = {
             red: { x: 0, y: 0 },
             blue: { x: 0, y: 90 },
@@ -585,25 +585,22 @@
           return map[c] || { x: 0, y: 0 };
         };
 
-        const Face = ({ cls, pattern }) => (
+        const colorNames = {
+          red: 'RED',
+          blue: 'BLUE',
+          green: 'GREEN',
+          yellow: 'YELLOW',
+          white: 'WHITE',
+          pink: 'PINK'
+        };
+
+        const Face = ({ cls, colorName }) => (
           <div className={`cube__face ${cls}`}>
-            <div className="pips">
-              {pattern.map((on, i) => (
-                <span key={i} className={`pip ${on ? 'active' : ''}`} />
-              ))}
+            <div className="flex items-center justify-center h-full">
+              <span className="text-4xl font-bold">{colorName}</span>
             </div>
           </div>
         );
-
-        // Patterns: 3x3 grid (left-to-right, top-to-bottom)
-        const patterns = {
-          one: [0,0,0,0,1,0,0,0,0],
-          two: [1,0,0,0,0,0,0,0,1],
-          three: [1,0,0,0,1,0,0,0,1],
-          four: [1,0,1,0,0,0,1,0,1],
-          five: [1,0,1,0,1,0,1,0,1],
-          six: [1,0,1,1,0,1,1,0,1]
-        };
 
         // compute transform and transition
         const computeSpin = (target) => {
@@ -649,12 +646,12 @@
         return (
           <div className="scene w-80 h-80 sm:w-96 sm:h-96">
             <div ref={cubeRef} className="cube" style={{ transform: transformStyle, transition: transitionStyle }}>
-              <Face cls="cube__face--red" pattern={patterns.one} />
-              <Face cls="cube__face--blue" pattern={patterns.two} />
-              <Face cls="cube__face--green" pattern={patterns.three} />
-              <Face cls="cube__face--yellow" pattern={patterns.four} />
-              <Face cls="cube__face--white" pattern={patterns.five} />
-              <Face cls="cube__face--pink" pattern={patterns.six} />
+              <Face cls="cube__face--red" colorName={colorNames.red} />
+              <Face cls="cube__face--blue" colorName={colorNames.blue} />
+              <Face cls="cube__face--green" colorName={colorNames.green} />
+              <Face cls="cube__face--yellow" colorName={colorNames.yellow} />
+              <Face cls="cube__face--white" colorName={colorNames.white} />
+              <Face cls="cube__face--pink" colorName={colorNames.pink} />
             </div>
             <style>{`@media (max-width: 640px) { .cube { --translate-z: 48px; } }`}</style>
           </div>
