@@ -4,453 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>BET-0-BET</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Use Inter for body and Orbitron for headings -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <style>
-      * {
-        font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      }
-
-      body {
-        background: #0a0a0a;
-        color: #00ffff;
-        overflow-x: hidden;
-        cursor: url('data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 3L10.07 19.97L12.58 12.58L19.97 10.07L3 3Z" fill="%2300ffff" stroke="white" stroke-width="1.5" stroke-linejoin="round"/></svg>') 2 2, auto;
-      }
-
-      button, a, .cursor-pointer, input, select {
-        cursor: url('data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 3L10.07 19.97L12.58 12.58L19.97 10.07L3 3Z" fill="%2300ffff" stroke="white" stroke-width="1.5" stroke-linejoin="round"/></svg>') 2 2, pointer;
-      }
-
-      /* Scanlines */
-      .scanlines {
-        background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.15));
-        background-size: 100% 2px;
-        pointer-events: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 999;
-      }
-
-      /* 3D Dice with Gradient */
-      .scene { 
-        perspective: 2000px; 
-        display: flex; 
-        justify-content: center; 
-        align-items: center; 
-      }
-
-      .cube { 
-        --translate-z: 48px; /* fallback until JS calculates exact half-width */
-        width: 100%; 
-        height: 100%; 
-        position: relative; 
-        transform-style: preserve-3d; 
-        transform-origin: 50% 50%;
-        transition: transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        filter: drop-shadow(0 0 30px rgba(0, 255, 255, 0.6));
-        transform: translateZ(500px);
-      }
-      
-      .cube__face {
-        position: absolute; 
-        top: 0;
-        left: 0;
-        width: 100%; 
-        height: 100%;
-        border: 3px solid #00ffff;
-        border-radius: 12px;
-        display: flex; 
-        justify-content: center; 
-        align-items: center;
-        font-family: 'Orbitron', cursive; 
-        font-size: 3rem;
-        font-weight: 900;
-        color: white; 
-        text-shadow: 0 0 15px rgba(0, 0, 0, 0.9);
-        box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 25px rgba(0, 255, 255, 0.4);
-      }
-      
-      .cube__face--red    { 
-        background: linear-gradient(135deg, #cc1111, #881111); 
-        transform: rotateY(0deg) translateZ(var(--translate-z));
-        box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 30px rgba(200, 50, 50, 0.6);
-      }
-      .cube__face--blue   { 
-        background: linear-gradient(135deg, #1166dd, #0044aa); 
-        transform: rotateY(90deg) translateZ(var(--translate-z));
-        box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 30px rgba(100, 150, 255, 0.6);
-      }
-      .cube__face--yellow { 
-        background: linear-gradient(135deg, #ccaa00, #998800); 
-        transform: rotateY(180deg) translateZ(var(--translate-z));
-        color: #222;
-        box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 30px rgba(200, 180, 50, 0.6);
-      }
-      .cube__face--green  { 
-        background: linear-gradient(135deg, #11aa44, #008833); 
-        transform: rotateY(-90deg) translateZ(var(--translate-z));
-        box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 30px rgba(100, 200, 100, 0.6);
-      }
-      .cube__face--white  { 
-        background: linear-gradient(135deg, #dddddd, #aaaaaa); 
-        transform: rotateX(90deg) translateZ(var(--translate-z));
-        color: #222; 
-        box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 30px rgba(200, 200, 200, 0.6);
-      }
-      .cube__face--pink   { 
-        background: linear-gradient(135deg, #dd1188, #aa0055); 
-        transform: rotateX(-90deg) translateZ(var(--translate-z));
-        box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 30px rgba(200, 80, 150, 0.6);
-      }
-
-      /* Dice pips */
-      .pips {
-        width: 70%;
-        height: 70%;
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: repeat(3, 1fr);
-        gap: 0.25rem;
-        align-items: center;
-        justify-items: center;
-      }
-
-      .pip {
-        width: 100%;
-        height: 100%;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-      }
-
-      .pip::before {
-        content: '';
-        width: 0.6rem;
-        height: 0.6rem;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.95);
-        box-shadow: 0 0 8px rgba(255,255,255,0.12);
-        display: block;
-        opacity: 0;
-        transition: opacity 0.12s ease-in-out, transform 0.12s ease-in-out;
-        transform: scale(0.9);
-      }
-
-      .pip.active::before { opacity: 1; transform: scale(1); }
-
-      /* Dark pips for light faces */
-      .cube__face--white .pip::before { background: #222; box-shadow: 0 0 6px rgba(0,0,0,0.6); }
-
-
-      @keyframes tumble {
-        0% { transform: rotateX(0) rotateY(0) rotateZ(0); }
-        25% { transform: rotateX(180deg) rotateY(90deg) rotateZ(45deg); }
-        50% { transform: rotateX(360deg) rotateY(180deg) rotateZ(90deg); }
-        75% { transform: rotateX(540deg) rotateY(270deg) rotateZ(135deg); }
-        100% { transform: rotateX(720deg) rotateY(360deg) rotateZ(180deg); }
-      }
-      .is-spinning { animation: tumble 0.6s linear infinite; }
-
-      /* Neon Glows */
-      .neon-glow {
-        text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
-        color: #00ffff;
-      }
-
-      .title-main {
-        font-family: 'Orbitron', sans-serif;
-        font-weight: 900;
-        letter-spacing: 6px;
-        font-size: clamp(3rem, 10vw, 6.5rem);
-        text-transform: uppercase;
-        background: linear-gradient(90deg, #00f0ff, #66ffda, #00aaff);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        text-shadow: 0 6px 18px rgba(0,255,255,0.08), 0 0 30px rgba(0, 170, 255, 0.25);
-        transform: skewY(-2deg);
-      }
-
-      /* Logo + header */
-      .logo {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 16px;
-      }
-
-      .logo-svg {
-        filter: drop-shadow(0 0 12px rgba(0, 255, 255, 0.5));
-        width: 72px;
-        height: 72px;
-        flex: 0 0 72px;
-      }
-
-      .logo-title {
-        font-family: 'Orbitron', sans-serif;
-        font-weight: 900;
-        font-size: clamp(2rem, 8vw, 3.2rem);
-        letter-spacing: 6px;
-        text-transform: uppercase;
-        background: linear-gradient(90deg, #00ffff, #66ffda, #99ffff);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        text-shadow: 0 4px 24px rgba(0,255,255,0.12);
-        line-height: 1;
-      }
-
-      .logo-tag {
-        font-family: 'Inter', system-ui, sans-serif;
-        font-size: 0.75rem;
-        letter-spacing: 2px;
-        color: #a6fff6;
-        opacity: 0.9;
-      }
-
-      @keyframes neonPulse {
-        0% { text-shadow: 0 0 6px rgba(0,255,255,0.12); }
-        50% { text-shadow: 0 0 22px rgba(0,255,255,0.55); }
-        100% { text-shadow: 0 0 6px rgba(0,255,255,0.12); }
-      }
-
-      .logo-title { animation: neonPulse 2.4s ease-in-out infinite; }
-
-      .title-cyber {
-        font-family: 'Orbitron', cursive;
-        font-weight: 700;
-        letter-spacing: 3px;
-        font-size: clamp(1.5rem, 8vw, 3rem);
-        text-transform: uppercase;
-        color: #00ffff;
-        text-shadow: 0 0 10px #00ffff;
-      }
-
-      /* Panel with Border */
-      .panel-border {
-        border: 2px solid #00ffff;
-        border-radius: 0;
-        background: rgba(0, 20, 40, 0.8);
-        position: relative;
-      }
-
-      .panel-border::before {
-        content: '';
-        position: absolute;
-        top: -8px;
-        left: -8px;
-        right: -8px;
-        bottom: -8px;
-        border: 2px solid #00ffff;
-        pointer-events: none;
-        opacity: 0.3;
-        border-radius: 0;
-      }
-
-      /* Glass Panel */
-      .glass-panel {
-        background: rgba(0, 20, 40, 0.8);
-        backdrop-filter: blur(10px);
-        border: 2px solid #00ffff;
-        box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.1), 0 0 20px rgba(0, 255, 255, 0.2);
-        border-radius: 0;
-      }
-
-      /* Cyber Buttons */
-      .btn-cyber {
-        background: rgba(0, 0, 0, 0.7);
-        border: 2px solid #00ffff;
-        color: #00ffff;
-        font-family: 'Orbitron', sans-serif;
-        font-weight: 700;
-        font-size: 0.9rem;
-        letter-spacing: 2px;
-        padding: 10px 24px;
-        border-radius: 0;
-        cursor: pointer;
-        transition: all 0.2s;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
-        position: relative;
-        overflow: hidden;
-        text-transform: uppercase;
-      }
-
-      .btn-cyber::before {
-        content: '';
-        position: absolute;
-        top: -2px;
-        left: -2px;
-        right: -2px;
-        bottom: -2px;
-        border: 1px solid rgba(0, 255, 255, 0.2);
-        pointer-events: none;
-      }
-
-      .btn-cyber:hover:not(:disabled) {
-        box-shadow: 0 0 30px rgba(0, 255, 255, 0.8), inset 0 0 15px rgba(0, 255, 255, 0.2);
-        background: rgba(0, 50, 100, 0.5);
-        transform: scale(1.02);
-      }
-
-      .btn-cyber:active:not(:disabled) {
-        transform: scale(0.98);
-        box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.5);
-      }
-
-      .btn-cyber:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-      }
-
-      /* Input Neon */
-      .input-cyber {
-        background: rgba(0, 20, 50, 0.8);
-        border: 2px solid #00ffff;
-        color: #00ffff;
-        font-family: 'Rajdhani', monospace;
-        font-size: 0.95rem;
-        padding: 10px 12px;
-        border-radius: 0;
-        transition: all 0.2s;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-      }
-
-      .input-cyber:focus {
-        outline: none;
-        border-color: #00ffff;
-        box-shadow: 0 0 20px rgba(0, 255, 255, 0.5), inset 0 0 10px rgba(0, 255, 255, 0.1);
-        background: rgba(0, 40, 80, 0.9);
-      }
-
-      .input-cyber::placeholder {
-        color: rgba(0, 255, 255, 0.3);
-        text-transform: uppercase;
-      }
-
-      /* Animations */
-      @keyframes flicker {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.6; }
-      }
-      .flicker { animation: flicker 0.15s infinite; }
-
-      @keyframes blink {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.4; }
-      }
-      .blink { animation: blink 0.8s infinite; }
-
-      @keyframes pulse-glow {
-        0%, 100% { filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.4)); }
-        50% { filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.8)); }
-      }
-      .pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
-
-      @keyframes float-particle {
-        0% { transform: translateY(0) rotateZ(0deg); opacity: 0; }
-        10% { opacity: 1; }
-        90% { opacity: 1; }
-        100% { transform: translateY(-100px) rotateZ(360deg); opacity: 0; }
-      }
-
-      .particle {
-        position: fixed;
-        pointer-events: none;
-        animation: float-particle 2s ease-out forwards;
-      }
-
-      /* Status Indicator */
-      .status-ok {
-        display: inline-block;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: #00ff00;
-        box-shadow: 0 0 10px #00ff00;
-        margin-right: 8px;
-        animation: pulse 1.5s ease-in-out infinite;
-      }
-
-      @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-      }
-
-      /* Color Swatch Style */
-      .color-swatch {
-        border: 3px solid rgba(0, 255, 255, 0.2);
-        transition: all 0.2s;
-        border-radius: 0;
-      }
-
-      .color-swatch:hover {
-        border-color: #00ffff;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
-        transform: scale(1.08);
-      }
-
-      .color-swatch.selected {
-        border-color: #00ffff;
-        box-shadow: 0 0 25px rgba(0, 255, 255, 1), inset 0 0 15px rgba(0, 255, 255, 0.4);
-        transform: scale(1.15);
-      }
-
-      /* Message Styling */
-      .msg-success {
-        background: rgba(0, 100, 50, 0.3);
-        border: 2px solid #00ff66;
-        color: #00ff66;
-        text-shadow: 0 0 10px #00ff66;
-        border-radius: 0;
-      }
-
-      .msg-error {
-        background: rgba(150, 20, 20, 0.3);
-        border: 2px solid #ff5555;
-        color: #ff5555;
-        text-shadow: 0 0 10px #ff5555;
-        border-radius: 0;
-      }
-
-      .msg-info {
-        background: rgba(0, 50, 100, 0.3);
-        border: 2px solid #00ffff;
-        color: #00ffff;
-        text-shadow: 0 0 10px #00ffff;
-        border-radius: 0;
-      }
-
-      /* Subtitle Style */
-      .subtitle {
-        font-size: 0.8rem;
-        letter-spacing: 3px;
-        color: #00ffff;
-        text-transform: uppercase;
-        margin-bottom: 8px;
-      }
-
-      .subtitle-auth {
-        font-size: 0.7rem;
-        letter-spacing: 2px;
-        color: #00ffff;
-        text-transform: uppercase;
-        margin: 16px 0;
-        padding: 8px 0;
-        border-top: 1px solid rgba(0, 255, 255, 0.3);
-        border-bottom: 1px solid rgba(0, 255, 255, 0.3);
-      }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div id="root"></div>
@@ -459,559 +20,554 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+/** @jsx React.createElement */
+const { useState, useEffect, useRef } = React;
 
-        // Language Strings (English + Chinese)
-        const STRINGS = {
-          en: {
-            title: 'BET-0-BET',
-            selectLanguage: 'Select Language',
-            english: 'English',
-            chinese: '中文',
-            play: 'Play Game',
-            playerName: 'Enter Your Name',
-            start: 'Start Game',
-            cancel: 'Cancel',
-            trial: 'Trial',
-            selectColor: 'Select a Color',
-            roll: 'Roll Dice',
-            correct: '✓ Correct — You won!',
-            incorrect: '✗ Wrong color!',
-            next: 'Next Trial',
-            gameOver: 'Game Over',
-            finalScore: 'Final Score',
-            wins: 'Wins',
-            playAgain: 'Play Again',
-            logout: 'Main Menu',
-            outOf: 'of 3',
-            login: 'Log In',
-            howToPlayButton: 'How To Play',
-            connect: 'Connect',
-            back: 'Back',
-            close: 'Close',
-            howToPlayTitle: 'How To Play',
-            howToPlay1: 'Enter your user ID and connect.',
-            howToPlay2: 'Select a color to bet on.',
-            howToPlay3: 'Press ROLL to tumble the dice.',
-            howToPlay4: 'If the dice lands on your color you win the trial.',
-            howToPlay5: 'Play 3 trials to get your final score.'
-          },
-          zh: {
-            title: 'BET-0-BET',
-            selectLanguage: '選擇語言',
-            english: 'English',
-            chinese: '中文',
-            play: '玩遊戲',
-            playerName: '輸入你的名字',
-            start: '開始遊戲',
-            cancel: '取消',
-            trial: '試試',
-            selectColor: '選擇一個顏色',
-            roll: '擲骰子',
-            correct: '✓ 正確！你贏了！',
-            incorrect: '✗ 錯誤的顏色！',
-            next: '下一個試試',
-            gameOver: '遊戲結束',
-            finalScore: '最終分數',
-            wins: '勝',
-            playAgain: '再玩一次',
-            logout: '主菜單',
-            outOf: '共 3 個',
-            login: '登入',
-            howToPlayButton: '遊戲說明',
-            connect: '連接',
-            back: '返回',
-            close: '關閉',
-            howToPlayTitle: '遊戲說明',
-            howToPlay1: '輸入您的使用者ID並連接。',
-            howToPlay2: '選擇您要下注的顏色。',
-            howToPlay3: '按擲骰子以滾動色子。',
-            howToPlay4: '如果色子停在您選擇的顏色，您贏得該回合。',
-            howToPlay5: '進行 3 個回合以獲得最終分數。'
-          }
-        };
+// Language Strings (English + Chinese)
+const STRINGS = {
+  en: {
+    title: 'BET-0-BET',
+    selectLanguage: 'Select Language',
+    english: 'English',
+    chinese: '中文',
+    play: 'Play Game',
+    playerName: 'Enter Your Name',
+    start: 'Start Game',
+    cancel: 'Cancel',
+    trial: 'Trial',
+    selectColor: 'Select a Color',
+    roll: 'Draw Card',
+    correct: '✓ Correct — You won!',
+    incorrect: '✗ Wrong color!',
+    next: 'Next Trial',
+    gameOver: 'Game Over',
+    finalScore: 'Final Score',
+    wins: 'Wins',
+    playAgain: 'Play Again',
+    logout: 'Main Menu',
+    outOf: 'of 3',
+    login: 'Log In',
+    howToPlayButton: 'How To Play',
+    connect: 'Connect',
+    back: 'Back',
+    close: 'Close',
+    howToPlayTitle: 'How To Play',
+    howToPlay1: 'Enter your user ID and connect.',
+    howToPlay2: 'Select a color to bet on.',
+    howToPlay3: 'Press DRAW to flip the card.',
+    howToPlay4: 'If the card shows your color you win the trial.',
+    howToPlay5: 'Play 3 trials to get your final score.'
+  },
+  zh: {
+    title: 'BET-0-BET',
+    selectLanguage: '選擇語言',
+    english: 'English',
+    chinese: '中文',
+    play: '玩遊戲',
+    playerName: '輸入你的名字',
+    start: '開始遊戲',
+    cancel: '取消',
+    trial: '試試',
+    selectColor: '選擇一個顏色',
+    roll: '抽牌',
+    correct: '✓ 正確！你贏了！',
+    incorrect: '✗ 錯誤的顏色！',
+    next: '下一個試試',
+    gameOver: '遊戲結束',
+    finalScore: '最終分數',
+    wins: '勝',
+    playAgain: '再玩一次',
+    logout: '主菜單',
+    outOf: '共 3 個',
+    login: '登入',
+    howToPlayButton: '遊戲說明',
+    connect: '連接',
+    back: '返回',
+    close: '關閉',
+    howToPlayTitle: '遊戲說明',
+    howToPlay1: '輸入您的使用者ID並連接。',
+    howToPlay2: '選擇您要下注的顏色。',
+    howToPlay3: '按抽牌以翻轉卡牌。',
+    howToPlay4: '如果色子停在您選擇的顏色，您贏得該回合。',
+    howToPlay5: '進行 3 個回合以獲得最終分數。'
+  }
+};
 
-        const COLORS = ['red', 'blue', 'green', 'yellow', 'white', 'pink'];
-        
-        const COLOR_TAILWIND = {
-            red: 'bg-red-600',
-            blue: 'bg-blue-600',
-            green: 'bg-green-600',
-            yellow: 'bg-yellow-500',
-            white: 'bg-gray-300',
-            pink: 'bg-pink-600'
-        };
+const COLORS = ['red', 'blue', 'green', 'yellow', 'white', 'pink'];
 
-        const COLOR_NAMES = {
-            en: { red: 'Red', blue: 'Blue', green: 'Green', yellow: 'Yellow', white: 'White', pink: 'Pink' },
-            zh: { red: '紅', blue: '藍', green: '綠', yellow: '黃', white: '白', pink: '粉紅' }
-        };
+const COLOR_TAILWIND = {
+    red: 'bg-red-600',
+    blue: 'bg-blue-600',
+    green: 'bg-green-600',
+    yellow: 'bg-yellow-500',
+    white: 'bg-gray-300',
+    pink: 'bg-pink-600'
+};
 
-        // Language selection display options (English + Chinese only)
-        const LANGUAGE_OPTIONS = [
-          { code: 'en', label: 'English' },
-          { code: 'zh', label: '中文' }
-        ];
+const COLOR_NAMES = {
+    en: { red: 'Red', blue: 'Blue', green: 'Green', yellow: 'Yellow', white: 'White', pink: 'Pink' },
+    zh: { red: '紅', blue: '藍', green: '綠', yellow: '黃', white: '白', pink: '粉紅' }
+};
 
-        // Particle Effect
-        const createParticle = (x, y) => {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.innerHTML = '◆';
-            particle.style.left = x + 'px';
-            particle.style.top = y + 'px';
-            particle.style.color = '#00ffff';
-            particle.style.fontSize = '14px';
-            particle.style.animation = `float-particle ${1 + Math.random()}s ease-out forwards`;
-            document.body.appendChild(particle);
-            setTimeout(() => particle.remove(), 2000);
-        };
+// Language selection display options (English + Chinese only)
+const LANGUAGE_OPTIONS = [
+  { code: 'en', label: 'English' },
+  { code: 'zh', label: '中文' }
+];
 
-        // Die Component
-      const Die = ({ color, isRolling, targetColor, duration = 2400 }) => {
-        const cubeRef = useRef(null);
-        const finalAngles = (c) => {
-          // return {this x: deg, y: deg }
-          const map = {
-            red: { x: 0, y: 0 },
-            blue: { x: 0, y: 90 },
-            green: { x: 0, y: -90 },
-            yellow: { x: 0, y: 180 },
-            white: { x: -90, y: 0 },
-            pink: { x: 90, y: 0 }
-          };
-          return map[c] || { x: 0, y: 0 };
-        };
+// Particle Effect
+const createParticle = (x, y) => {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.innerHTML = '◆';
+    particle.style.left = x + 'px';
+    particle.style.top = y + 'px';
+    particle.style.color = '#00ffff';
+    particle.style.fontSize = '14px';
+    particle.style.animation = `float-particle ${1 + Math.random()}s ease-out forwards`;
+    document.body.appendChild(particle);
+    setTimeout(() => particle.remove(), 2000);
+};
 
-        const colorNames = {
-          red: 'RED',
-          blue: 'BLUE',
-          green: 'GREEN',
-          yellow: 'YELLOW',
-          white: 'WHITE',
-          pink: 'PINK'
-        };
+// Card Component
+const Card = ({ color, isRolling, targetColor, duration = 2400 }) => {
+  const cardRef = useRef(null);
+  const [isFlipped, setIsFlipped] = useState(false);
 
-        const Face = ({ cls, colorName }) => (
-          <div className={`cube__face ${cls}`}>
-            <div className="flex items-center justify-center h-full">
-              <span className="text-4xl font-bold">{colorName}</span>
+  const colorNames = {
+    red: 'RED',
+    blue: 'BLUE',
+    green: 'GREEN',
+    yellow: 'YELLOW',
+    white: 'WHITE',
+    pink: 'PINK'
+  };
+
+  const colorStyles = {
+    red: { background: 'linear-gradient(135deg, #cc1111, #881111)', textColor: 'white' },
+    blue: { background: 'linear-gradient(135deg, #1166dd, #0044aa)', textColor: 'white' },
+    green: { background: 'linear-gradient(135deg, #11aa44, #008833)', textColor: 'white' },
+    yellow: { background: 'linear-gradient(135deg, #ccaa00, #998800)', textColor: '#222' },
+    white: { background: 'linear-gradient(135deg, #dddddd, #aaaaaa)', textColor: '#222' },
+    pink: { background: 'linear-gradient(135deg, #dd1188, #aa0055)', textColor: 'white' }
+  };
+
+  useEffect(() => {
+    if (isRolling && targetColor) {
+      setIsFlipped(true);
+      const timer = setTimeout(() => {
+        setIsFlipped(false);
+      }, duration);
+      return () => clearTimeout(timer);
+    }
+  }, [isRolling, targetColor, duration]);
+
+  const currentColor = isRolling && targetColor ? targetColor : color;
+  const style = colorStyles[currentColor] || colorStyles.red;
+
+  return (
+    <div className="flex justify-center items-center w-80 h-80 sm:w-96 sm:h-96">
+      <div
+        ref={cardRef}
+        className={`card-container ${isFlipped ? 'flipped' : ''}`}
+        style={{ perspective: '1000px' }}
+      >
+        <div className="card-flipper">
+          {/* Card Back */}
+          <div className="card-face card-back">
+            <div className="card-pattern">
+              <div className="card-suit">♠</div>
+              <div className="card-suit">♥</div>
+              <div className="card-suit">♦</div>
+              <div className="card-suit">♣</div>
+            </div>
+            <div className="card-text">BET CARD</div>
+          </div>
+          {/* Card Front */}
+          <div className="card-face card-front" style={{ background: style.background }}>
+            <div className="card-content">
+              <div className="card-number" style={{ color: style.textColor }}>
+                {colorNames[currentColor]}
+              </div>
+              <div className="card-color-indicator" style={{ background: style.background }}></div>
             </div>
           </div>
-        );
+        </div>
+      </div>
+    </div>
+  );
+};
 
-        // compute transform and transition
-        const computeSpin = (target) => {
-          const final = finalAngles(target);
-          // random full rotations for tumble
-          const fullX = 360 * (2 + Math.floor(Math.random() * 3));
-          const fullY = 360 * (2 + Math.floor(Math.random() * 3));
-          const offsetX = (Math.random() - 0.5) * 60; // +-30deg
-          const offsetY = (Math.random() - 0.5) * 60;
-          const spinX = final.x + fullX + offsetX;
-          const spinY = final.y + fullY + offsetY;
-          return { spinX, spinY };
-        };
+// Main App
+const App = () => {
+    const [language, setLanguage] = useState(null);
+    const [playerName, setPlayerName] = useState('');
+    const [showHelp, setShowHelp] = useState(false);
+    const [gameState, setGameState] = useState('splash');
+    const [trialCount, setTrialCount] = useState(0);
+    const [wins, setWins] = useState(0);
+    const [selectedColor, setSelectedColor] = useState(null);
+    const [diceResult, setDiceResult] = useState('red');
+    const [isRolling, setIsRolling] = useState(false);
+    const [targetColor, setTargetColor] = useState(null);
+    const rollDuration = 2400; // ms
+    const [message, setMessage] = useState('');
+    const [lastResult, setLastResult] = useState(null);
 
-        // choose transform depending on rolling
-        let transformStyle = '';
-        let transitionStyle = undefined;
+    const t = (key) => STRINGS[language]?.[key] || key;
 
-        if (isRolling && targetColor) {
-          const { spinX, spinY } = computeSpin(targetColor);
-          transformStyle = `rotateX(${spinX}deg) rotateY(${spinY}deg)`;
-          transitionStyle = `transform ${duration}ms cubic-bezier(0.22, 0.9, 0.28, 1)`;
+    const startGame = () => {
+        if (!playerName.trim()) return;
+        setGameState('playing');
+        setTrialCount(1);
+        setWins(0);
+        setSelectedColor(null);
+        setMessage(t('selectColor'));
+        setLastResult(null);
+    };
+
+    const handleRoll = () => {
+      if (!selectedColor || isRolling) return;
+      // choose outcome immediately, animate to it, then reveal
+      const randomColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+      setTargetColor(randomColor);
+      setIsRolling(true);
+      setMessage('');
+
+      // finalize after animation
+      setTimeout(() => {
+        setDiceResult(randomColor);
+        setIsRolling(false);
+        setTargetColor(null);
+
+        if (randomColor === selectedColor) {
+          setWins(wins + 1);
+          setLastResult('win');
+          setMessage(t('correct'));
+          createParticle(window.innerWidth / 2, window.innerHeight / 2);
         } else {
-          const final = finalAngles(color);
-          transformStyle = `rotateX(${final.x}deg) rotateY(${final.y}deg)`;
-          transitionStyle = 'transform 600ms ease-out';
+          setLastResult('lose');
+          setMessage(t('incorrect'));
         }
+      }, rollDuration + 100);
+    };
 
-        // dynamically set translateZ to half the cube width (in px) so faces form a cube
-        useEffect(() => {
-          const updateTranslate = () => {
-            const node = cubeRef.current;
-            if (!node) return;
-            const w = node.getBoundingClientRect().width;
-            // set half width (px) as translateZ
-            node.style.setProperty('--translate-z', `${Math.round(w / 2)}px`);
-          };
-          updateTranslate();
-          window.addEventListener('resize', updateTranslate);
-          return () => window.removeEventListener('resize', updateTranslate);
-        }, []);
+    const nextTrial = () => {
+        if (trialCount < 3) {
+            setTrialCount(trialCount + 1);
+            setSelectedColor(null);
+            setMessage(t('selectColor'));
+            setLastResult(null);
+        } else {
+            setGameState('gameover');
+        }
+    };
 
-        return (
-          <div className="scene w-80 h-80 sm:w-96 sm:h-96">
-            <div ref={cubeRef} className="cube" style={{ transform: transformStyle, transition: transitionStyle }}>
-              <Face cls="cube__face--red" colorName={colorNames.red} />
-              <Face cls="cube__face--blue" colorName={colorNames.blue} />
-              <Face cls="cube__face--green" colorName={colorNames.green} />
-              <Face cls="cube__face--yellow" colorName={colorNames.yellow} />
-              <Face cls="cube__face--white" colorName={colorNames.white} />
-              <Face cls="cube__face--pink" colorName={colorNames.pink} />
-            </div>
-            <style>{`@media (max-width: 640px) { .cube { --translate-z: 48px; } }`}</style>
-          </div>
-        );
-      };
+    const playAgain = () => {
+        setGameState('setup');
+        setPlayerName('');
+        setTrialCount(0);
+        setWins(0);
+        setSelectedColor(null);
+        setLastResult(null);
+    };
 
-        // Main App
-        const App = () => {
-            const [language, setLanguage] = useState(null);
-            const [playerName, setPlayerName] = useState('');
-            const [showHelp, setShowHelp] = useState(false);
-            const [gameState, setGameState] = useState('splash');
-            const [trialCount, setTrialCount] = useState(0);
-            const [wins, setWins] = useState(0);
-            const [selectedColor, setSelectedColor] = useState(null);
-            const [diceResult, setDiceResult] = useState('red');
-            const [isRolling, setIsRolling] = useState(false);
-            const [targetColor, setTargetColor] = useState(null);
-            const rollDuration = 2400; // ms
-            const [message, setMessage] = useState('');
-            const [lastResult, setLastResult] = useState(null);
-
-            const t = (key) => STRINGS[language]?.[key] || key;
-
-            const startGame = () => {
-                if (!playerName.trim()) return;
-                setGameState('playing');
-                setTrialCount(1);
-                setWins(0);
-                setSelectedColor(null);
-                setMessage(t('selectColor'));
-                setLastResult(null);
-            };
-
-            const handleRoll = () => {
-              if (!selectedColor || isRolling) return;
-              // choose outcome immediately, animate to it, then reveal
-              const randomColor = COLORS[Math.floor(Math.random() * COLORS.length)];
-              setTargetColor(randomColor);
-              setIsRolling(true);
-              setMessage('');
-
-              // finalize after animation
-              setTimeout(() => {
-                setDiceResult(randomColor);
-                setIsRolling(false);
-                setTargetColor(null);
-
-                if (randomColor === selectedColor) {
-                  setWins(wins + 1);
-                  setLastResult('win');
-                  setMessage(t('correct'));
-                  createParticle(window.innerWidth / 2, window.innerHeight / 2);
-                } else {
-                  setLastResult('lose');
-                  setMessage(t('incorrect'));
-                }
-              }, rollDuration + 100);
-            };
-
-            const nextTrial = () => {
-                if (trialCount < 3) {
-                    setTrialCount(trialCount + 1);
-                    setSelectedColor(null);
-                    setMessage(t('selectColor'));
-                    setLastResult(null);
-                } else {
-                    setGameState('gameover');
-                }
-            };
-
-            const playAgain = () => {
-                setGameState('setup');
-                setPlayerName('');
-                setTrialCount(0);
-                setWins(0);
-                setSelectedColor(null);
-                setLastResult(null);
-            };
-
-            return (
-                <div className="min-h-screen flex flex-col items-center justify-center p-4">
-                    {/* Splash Screen */}
-                    {gameState === 'splash' && (
-                        <div className="text-center w-full max-w-4xl">
-                            <div className="logo mb-6">
-                                <svg className="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                                  <defs>
-                                    <linearGradient id="g1" x1="0" x2="1">
-                                      <stop offset="0%" stop-color="#00f0ff" />
-                                      <stop offset="50%" stop-color="#66ffda" />
-                                      <stop offset="100%" stop-color="#00aaff" />
-                                    </linearGradient>
-                                  </defs>
-                                  <g fill="none" stroke="url(#g1)" stroke-width="4" stroke-linejoin="round">
-                                    <polygon points="50,6 88,28 88,72 50,94 12,72 12,28" fill="rgba(0,255,255,0.04)" />
-                                    <path d="M50 22 L66 50 L50 78 L34 50 Z" fill="url(#g1)" opacity="0.08"/>
-                                  </g>
-                                  <circle cx="50" cy="50" r="28" stroke="url(#g1)" stroke-width="1" fill="rgba(0,255,255,0.02)" />
-                                </svg>
-                                <div>
-                                  <div className="logo-title">BET-0-BET</div>
-                                  <div className="logo-tag">NEON CHALLENGE</div>
-                                </div>
-                            </div>
-                            <div className="glass-panel p-8 mb-6">
-                                <p className="text-sm text-cyan-300 mb-6">奎妲兒 / dharls</p>
-                                <div className="flex gap-4">
-                                  <button
-                                    onClick={() => setGameState('language')}
-                                    className="btn-cyber px-8 py-2 flex-1 text-lg"
-                                  >
-                                    {STRINGS[language || 'en'].start}
-                                  </button>
-                                  <button
-                                    onClick={() => setShowHelp(true)}
-                                    className="btn-cyber px-8 py-2 flex-1 text-lg"
-                                  >
-                                    {STRINGS[language || 'en'].howToPlayButton}
-                                  </button>
-                                </div>
-                                <p className="text-xs text-cyan-300 mt-6 opacity-60">AUTHENTICATION REQUIRED</p>
-                            </div>
-
-                            {/* Help overlay */}
-                            {showHelp && (
-                              <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-                                <div className="glass-panel p-8 w-full max-w-lg">
-                                  <h3 className="title-cyber mb-4">{STRINGS[language || 'en'].howToPlayTitle}</h3>
-                                  <div className="text-left space-y-4 mb-6">
-                                    <div>
-                                      <div className="font-semibold">1. {STRINGS.en.howToPlay1}</div>
-                                      <div className="text-sm text-cyan-200 mt-1">{STRINGS.zh.howToPlay1}</div>
-                                    </div>
-                                    <div>
-                                      <div className="font-semibold">2. {STRINGS.en.howToPlay2}</div>
-                                      <div className="text-sm text-cyan-200 mt-1">{STRINGS.zh.howToPlay2}</div>
-                                    </div>
-                                    <div>
-                                      <div className="font-semibold">3. {STRINGS.en.howToPlay3}</div>
-                                      <div className="text-sm text-cyan-200 mt-1">{STRINGS.zh.howToPlay3}</div>
-                                    </div>
-                                    <div>
-                                      <div className="font-semibold">4. {STRINGS.en.howToPlay4}</div>
-                                      <div className="text-sm text-cyan-200 mt-1">{STRINGS.zh.howToPlay4}</div>
-                                    </div>
-                                    <div>
-                                      <div className="font-semibold">5. {STRINGS.en.howToPlay5}</div>
-                                      <div className="text-sm text-cyan-200 mt-1">{STRINGS.zh.howToPlay5}</div>
-                                    </div>
-                                  </div>
-                                  <div className="flex gap-4">
-                                    <button onClick={() => setShowHelp(false)} className="btn-cyber flex-1">{STRINGS[language || 'en'].close}</button>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
+    return (
+        <div className="min-h-screen flex flex-col items-center justify-center p-4">
+            {/* Splash Screen */}
+            {gameState === 'splash' && (
+                <div className="text-center w-full max-w-4xl">
+                    <div className="logo mb-6">
+                        <svg className="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                          <defs>
+                            <linearGradient id="g1" x1="0" x2="1">
+                              <stop offset="0%" stop-color="#00f0ff" />
+                              <stop offset="50%" stop-color="#66ffda" />
+                              <stop offset="100%" stop-color="#00aaff" />
+                            </linearGradient>
+                          </defs>
+                          <g fill="none" stroke="url(#g1)" stroke-width="4" stroke-linejoin="round">
+                            <polygon points="50,6 88,28 88,72 50,94 12,72 12,28" fill="rgba(0,255,255,0.04)" />
+                            <path d="M50 22 L66 50 L50 78 L34 50 Z" fill="url(#g1)" opacity="0.08"/>
+                          </g>
+                          <circle cx="50" cy="50" r="28" stroke="url(#g1)" stroke-width="1" fill="rgba(0,255,255,0.02)" />
+                        </svg>
+                        <div>
+                          <div className="logo-title">BET-0-BET</div>
+                          <div className="logo-tag">NEON CHALLENGE</div>
                         </div>
-                    )}
+                    </div>
+                    <div className="glass-panel p-8 mb-6">
+                        <p className="text-sm text-cyan-300 mb-6">奎妲兒 / dharls</p>
+                        <div className="flex gap-4">
+                          <button
+                            onClick={() => setGameState('language')}
+                            className="btn-cyber px-8 py-2 flex-1 text-lg"
+                          >
+                            {STRINGS[language || 'en'].start}
+                          </button>
+                          <button
+                            onClick={() => setShowHelp(true)}
+                            className="btn-cyber px-8 py-2 flex-1 text-lg"
+                          >
+                            {STRINGS[language || 'en'].howToPlayButton}
+                          </button>
+                        </div>
+                        <p className="text-xs text-cyan-300 mt-6 opacity-60">AUTHENTICATION REQUIRED</p>
+                    </div>
 
-                    {/* Language Selection */}
-                    {gameState === 'language' && (
-                      <div className="w-full max-w-2xl">
-                        <div className="glass-panel p-12 text-center">
-                          <h2 className="title-cyber mb-8">SELECT LANGUAGE</h2>
-
-                          <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 max-w-sm mx-auto">
-                            {LANGUAGE_OPTIONS.map(opt => (
-                              <button
-                                key={opt.code}
-                                onClick={() => setLanguage(opt.code)}
-                                className={`btn-cyber py-3 ${language === opt.code ? 'ring-4 ring-cyan-300' : ''}`}
-                              >
-                                {opt.label}
-                              </button>
-                            ))}
+                    {/* Help overlay */}
+                    {showHelp && (
+                      <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+                        <div className="glass-panel p-8 w-full max-w-lg">
+                          <h3 className="title-cyber mb-4">{STRINGS[language || 'en'].howToPlayTitle}</h3>
+                          <div className="text-left space-y-4 mb-6">
+                            <div>
+                              <div className="font-semibold">1. {STRINGS.en.howToPlay1}</div>
+                              <div className="text-sm text-cyan-200 mt-1">{STRINGS.zh.howToPlay1}</div>
+                            </div>
+                            <div>
+                              <div className="font-semibold">2. {STRINGS.en.howToPlay2}</div>
+                              <div className="text-sm text-cyan-200 mt-1">{STRINGS.zh.howToPlay2}</div>
+                            </div>
+                            <div>
+                              <div className="font-semibold">3. {STRINGS.en.howToPlay3}</div>
+                              <div className="text-sm text-cyan-200 mt-1">{STRINGS.zh.howToPlay3}</div>
+                            </div>
+                            <div>
+                              <div className="font-semibold">4. {STRINGS.en.howToPlay4}</div>
+                              <div className="text-sm text-cyan-200 mt-1">{STRINGS.zh.howToPlay4}</div>
+                            </div>
+                            <div>
+                              <div className="font-semibold">5. {STRINGS.en.howToPlay5}</div>
+                              <div className="text-sm text-cyan-200 mt-1">{STRINGS.zh.howToPlay5}</div>
+                            </div>
                           </div>
-
-                          <p className="text-xs text-cyan-300 mt-6 opacity-60">SELECT ACCESS MODE</p>
-
-                          <div className="flex gap-4 mt-6">
-                            <button
-                              type="button"
-                              onClick={() => { setGameState('splash'); setLanguage(null); }}
-                              className="btn-cyber flex-1"
-                            >
-                              {STRINGS[language]?.cancel || STRINGS.en.cancel}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => { if (language) setGameState('setup'); }}
-                              disabled={!language}
-                              className="btn-cyber flex-1"
-                            >
-                              {STRINGS[language]?.start || STRINGS.en.start}
-                            </button>
+                          <div className="flex gap-4">
+                            <button onClick={() => setShowHelp(false)} className="btn-cyber flex-1">{STRINGS[language || 'en'].close}</button>
                           </div>
                         </div>
                       </div>
                     )}
-
-                    {/* Setup */}
-                    {gameState === 'setup' && language && (
-                        <div className="w-full max-w-2xl">
-                            <div className="glass-panel p-12">
-                                <h2 className="title-cyber mb-8 text-center">AUTHENTICATION REQUIRED</h2>
-                                <form onSubmit={(e) => { e.preventDefault(); startGame(); }} className="space-y-6">
-                                    <div>
-                                        <label className="block text-cyan-400 text-xs font-bold mb-2 tracking-widest">&gt; ENTER USER ID</label>
-                                        <input
-                                            type="text"
-                                            value={playerName}
-                                            onChange={(e) => setPlayerName(e.target.value)}
-                                            placeholder="ENTER USER ID"
-                                            className="input-cyber w-full"
-                                            maxLength={20}
-                                            autoFocus
-                                        />
-                                    </div>
-                                    <div className="flex gap-4">
-                                        <button
-                                            type="button"
-                                            onClick={() => setGameState('language')}
-                                            className="btn-cyber flex-1"
-                                        >
-                                            {STRINGS[language]?.back || STRINGS.en.back}
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            disabled={!playerName.trim()}
-                                            className="btn-cyber flex-1"
-                                        >
-                                            {STRINGS[language]?.connect || STRINGS.en.connect}
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Game Playing */}
-                    {gameState === 'playing' && language && (
-                        <div className="w-full max-w-3xl">
-                            <div className="glass-panel p-12">
-                                {/* Header */}
-                                <div className="grid grid-cols-2 gap-4 mb-8 pb-8 border-b border-cyan-400 border-opacity-30">
-                                    <div>
-                                        <div className="text-xs text-cyan-400 mb-1 tracking-widest">&gt; PLAYER</div>
-                                        <div className="text-2xl font-bold text-white">{playerName}</div>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className="text-xs text-cyan-400 mb-1 tracking-widest">&gt; TRIAL</div>
-                                        <div className="text-3xl font-bold text-cyan-300">{trialCount}/3</div>
-                                    </div>
-                                    <div>
-                                        <div className="text-xs text-green-400 mb-1 tracking-widest">&gt; WINS</div>
-                                        <div className="text-3xl font-bold text-green-400 neon-glow">{wins}</div>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className="text-xs text-cyan-400 mb-1 tracking-widest">&gt; STATUS</div>
-                                        <div className={`text-sm font-bold ${isRolling ? 'text-yellow-400 flicker' : 'text-cyan-300'}`}>
-                                            {isRolling ? 'ROLLING...' : 'READY'}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Dice Display */}
-                                <div className="flex justify-center my-12 p-8 glass-panel">
-                                <Die color={diceResult} isRolling={isRolling} targetColor={targetColor} duration={rollDuration} />
-                              </div>
-
-                                {/* Message */}
-                                {message && (
-                                    <div className={`text-center font-bold text-lg mb-6 p-4 ${
-                                        lastResult === 'win' ? 'msg-success' : 
-                                        lastResult === 'lose' ? 'msg-error' : 
-                                        'msg-info'
-                                    }`}>
-                                        {message}
-                                    </div>
-                                )}
-
-                                {/* Color Selection */}
-                                {!isRolling && lastResult === null && (
-                                    <div className="mb-8">
-                                        <div className="text-cyan-400 text-xs font-bold mb-4 tracking-widest">&gt; SELECT COLOR</div>
-                                        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-                                            {COLORS.map((color) => (
-                                                <button
-                                                    key={color}
-                                                    onClick={() => setSelectedColor(color)}
-                                                    className={`color-swatch aspect-square border-4 transition-all ${COLOR_TAILWIND[color]} ${selectedColor === color ? 'selected' : ''}`}
-                                                      title={COLOR_NAMES[language]?.[color] || COLOR_NAMES.en[color]}
-                                                >
-                                                    <span className="text-xs font-bold text-white drop-shadow-lg hidden sm:inline">
-                                                      {(COLOR_NAMES[language]?.[color] || COLOR_NAMES.en[color]).substring(0,1)}
-                                                    </span>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Roll Button */}
-                                {!isRolling && lastResult === null && (
-                                    <button
-                                        onClick={handleRoll}
-                                        disabled={!selectedColor}
-                                        className="btn-cyber w-full text-lg py-3"
-                                    >
-                                        {STRINGS[language]?.roll || STRINGS.en.roll}
-                                    </button>
-                                )}
-
-                                {/* Next Button */}
-                                {lastResult !== null && (
-                                    <button
-                                        onClick={nextTrial}
-                                        className="btn-cyber w-full text-lg py-3"
-                                    >
-                                        // {trialCount < 3 ? 'NEXT TRIAL' : 'GAME OVER'}
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Game Over */}
-                    {gameState === 'gameover' && language && (
-                        <div className="w-full max-w-2xl">
-                            <div className="glass-panel p-12 text-center">
-                                <h2 className="title-cyber mb-6">GAME OVER</h2>
-                                <p className="text-xl text-cyan-300 mb-8">{playerName}</p>
-                                <div className="glass-panel p-8 mb-8 bg-opacity-50">
-                                    <div className="text-cyan-400 text-xs mb-2 tracking-widest">&gt; FINAL SCORE</div>
-                                    <div className="text-6xl font-bold text-cyan-300">{wins}/3</div>
-                                </div>
-                                <div className="flex gap-4 flex-col sm:flex-row">
-                                    <button
-                                        onClick={playAgain}
-                                        className="btn-cyber flex-1"
-                                    >
-                                        {STRINGS[language]?.playAgain || STRINGS.en.playAgain}
-                                    </button>
-                                    <button
-                                        onClick={() => { setGameState('language'); setLanguage(null); }}
-                                        className="btn-cyber flex-1"
-                                    >
-                                        // LOGOUT
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
                 </div>
-            );
-        };
+            )}
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+            {/* Language Selection */}
+            {gameState === 'language' && (
+              <div className="w-full max-w-2xl">
+                <div className="glass-panel p-12 text-center">
+                  <h2 className="title-cyber mb-8">SELECT LANGUAGE</h2>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 max-w-sm mx-auto">
+                    {LANGUAGE_OPTIONS.map(opt => (
+                      <button
+                        key={opt.code}
+                        onClick={() => setLanguage(opt.code)}
+                        className={`btn-cyber py-3 ${language === opt.code ? 'ring-4 ring-cyan-300' : ''}`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <p className="text-xs text-cyan-300 mt-6 opacity-60">SELECT ACCESS MODE</p>
+
+                  <div className="flex gap-4 mt-6">
+                    <button
+                      type="button"
+                      onClick={() => { setGameState('splash'); setLanguage(null); }}
+                      className="btn-cyber flex-1"
+                    >
+                      {STRINGS[language]?.cancel || STRINGS.en.cancel}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { if (language) setGameState('setup'); }}
+                      disabled={!language}
+                      className="btn-cyber flex-1"
+                    >
+                      {STRINGS[language]?.start || STRINGS.en.start}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Setup */}
+            {gameState === 'setup' && language && (
+                <div className="w-full max-w-2xl">
+                    <div className="glass-panel p-12">
+                        <h2 className="title-cyber mb-8 text-center">AUTHENTICATION REQUIRED</h2>
+                        <form onSubmit={(e) => { e.preventDefault(); startGame(); }} className="space-y-6">
+                            <div>
+                                <label className="block text-cyan-400 text-xs font-bold mb-2 tracking-widest">&gt; ENTER USER ID</label>
+                                <input
+                                    type="text"
+                                    value={playerName}
+                                    onChange={(e) => setPlayerName(e.target.value)}
+                                    placeholder="ENTER USER ID"
+                                    className="input-cyber w-full"
+                                    maxLength={20}
+                                    autoFocus
+                                />
+                            </div>
+                            <div className="flex gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setGameState('language')}
+                                    className="btn-cyber flex-1"
+                                >
+                                    {STRINGS[language]?.back || STRINGS.en.back}
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={!playerName.trim()}
+                                    className="btn-cyber flex-1"
+                                >
+                                    {STRINGS[language]?.connect || STRINGS.en.connect}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Game Playing */}
+            {gameState === 'playing' && language && (
+                <div className="w-full max-w-3xl">
+                    <div className="glass-panel p-12">
+                        {/* Header */}
+                        <div className="grid grid-cols-2 gap-4 mb-8 pb-8 border-b border-cyan-400 border-opacity-30">
+                            <div>
+                                <div className="text-xs text-cyan-400 mb-1 tracking-widest">&gt; PLAYER</div>
+                                <div className="text-2xl font-bold text-white">{playerName}</div>
+                            </div>
+                            <div className="text-right">
+                                <div className="text-xs text-cyan-400 mb-1 tracking-widest">&gt; TRIAL</div>
+                                <div className="text-3xl font-bold text-cyan-300">{trialCount}/3</div>
+                            </div>
+                            <div>
+                                <div className="text-xs text-green-400 mb-1 tracking-widest">&gt; WINS</div>
+                                <div className="text-3xl font-bold text-green-400 neon-glow">{wins}</div>
+                            </div>
+                            <div className="text-right">
+                                <div className="text-xs text-cyan-400 mb-1 tracking-widest">&gt; STATUS</div>
+                                <div className={`text-sm font-bold ${isRolling ? 'text-yellow-400 flicker' : 'text-cyan-300'}`}>
+                                    {isRolling ? 'ROLLING...' : 'READY'}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Dice Display */}
+                        <div className="flex justify-center my-12 p-8 glass-panel">
+                        <Card color={diceResult} isRolling={isRolling} targetColor={targetColor} duration={rollDuration} />
+                      </div>
+
+                        {/* Message */}
+                        {message && (
+                            <div className={`text-center font-bold text-lg mb-6 p-4 ${
+                                lastResult === 'win' ? 'msg-success' : 
+                                lastResult === 'lose' ? 'msg-error' : 
+                                'msg-info'
+                            }`}>
+                                {message}
+                            </div>
+                        )}
+
+                        {/* Color Selection */}
+                        {!isRolling && lastResult === null && (
+                            <div className="mb-8">
+                                <div className="text-cyan-400 text-xs font-bold mb-4 tracking-widest">&gt; SELECT COLOR</div>
+                                <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                                    {COLORS.map((color) => (
+                                        <button
+                                            key={color}
+                                            onClick={() => setSelectedColor(color)}
+                                            className={`color-swatch aspect-square border-4 transition-all ${COLOR_TAILWIND[color]} ${selectedColor === color ? 'selected' : ''}`}
+                                              title={COLOR_NAMES[language]?.[color] || COLOR_NAMES.en[color]}
+                                        >
+                                            <span className="text-xs font-bold text-white drop-shadow-lg hidden sm:inline">
+                                              {(COLOR_NAMES[language]?.[color] || COLOR_NAMES.en[color]).substring(0,1)}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Roll Button */}
+                        {!isRolling && lastResult === null && (
+                            <button
+                                onClick={handleRoll}
+                                disabled={!selectedColor}
+                                className="btn-cyber w-full text-lg py-3"
+                            >
+                                {STRINGS[language]?.roll || STRINGS.en.roll}
+                            </button>
+                        )}
+
+                        {/* Next Button */}
+                        {lastResult !== null && (
+                            <button
+                                onClick={nextTrial}
+                                className="btn-cyber w-full text-lg py-3"
+                            >
+                                {trialCount < 3 ? 'NEXT TRIAL' : 'GAME OVER'}
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Game Over */}
+            {gameState === 'gameover' && language && (
+                <div className="w-full max-w-2xl">
+                    <div className="glass-panel p-12 text-center">
+                        <h2 className="title-cyber mb-6">GAME OVER</h2>
+                        <p className="text-xl text-cyan-300 mb-8">{playerName}</p>
+                        <div className="glass-panel p-8 mb-8 bg-opacity-50">
+                            <div className="text-cyan-400 text-xs mb-2 tracking-widest">&gt; FINAL SCORE</div>
+                            <div className="text-6xl font-bold text-cyan-300">{wins}/3</div>
+                        </div>
+                        <div className="flex gap-4 flex-col sm:flex-row">
+                            <button
+                                onClick={playAgain}
+                                className="btn-cyber flex-1"
+                            >
+                                {STRINGS[language]?.playAgain || STRINGS.en.playAgain}
+                            </button>
+                            <button
+                                onClick={() => { setGameState('language'); setLanguage(null); }}
+                                className="btn-cyber flex-1"
+                            >
+                                LOGOUT
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
     </script>
 </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </html>
