@@ -278,10 +278,13 @@ const App = () => {
                     <div className="toy-pic toy-5">🎪</div>
                     <div className="toy-pic toy-6">🎯</div>
 
-                    <h1 className="title-night-market">
-                        {t.title}<br/>
-                        <span className="text-4xl text-white" style={{textShadow:'2px 2px 0 #000'}}>{t.subtitle}</span>
-                    </h1>
+                    <div className="title-night-market">
+                        <div className="title-bet-header">{t.subtitle}</div>
+                        <div className="title-split-container">
+                            <div className="title-night">NIGHT</div>
+                            <div className="title-market">MARKET</div>
+                        </div>
+                    </div>
 
                     <div className="flex flex-col gap-4 w-full px-8 mt-8">
                         <button onClick={handleStart} className="btn-comic py-3">

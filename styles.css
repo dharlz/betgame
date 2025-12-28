@@ -210,17 +210,48 @@
       /* --- TEXT STYLES --- */
       .title-night-market {
         font-family: 'Bangers', cursive;
-        font-size: clamp(3rem, 12vw, 6rem);
         color: #ffcc00;
         text-align: center;
         line-height: 0.9;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 10;
+      }
+      
+      .title-bet-header {
+        font-size: clamp(2rem, 8vw, 4rem);
+        color: #ffffff;
+        text-shadow: 
+            3px 3px 0px #000,
+            0 0 15px rgba(255,255,255,0.8);
+        animation: glow 2s ease-in-out infinite alternate;
+        display: block;
+        margin-bottom: 1.5rem;
+      }
+      
+      .title-split-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        margin: 0 auto;
+      }
+      
+      .title-night, .title-market {
+        font-size: clamp(3rem, 12vw, 6rem);
         text-shadow: 
             4px 4px 0px #000,
             -2px -2px 0px #ff3333,
             0 0 20px rgba(255,204,0,0.8);
-        transform: rotate(-2deg);
-        margin-bottom: 1rem;
         animation: glow 2s ease-in-out infinite alternate, bounce 4s ease-in-out infinite;
+      }
+      
+      .title-night {
+        transform: rotate(-5deg);
+      }
+      
+      .title-market {
+        transform: rotate(5deg);
       }
 
       @keyframes glow {
@@ -269,8 +300,8 @@
         width: 4px; height: 10px;
         background: #666;
       }
-      .lantern-left { top: 20%; left: -80px; }
-      .lantern-right { top: 20%; right: -80px; }
+      .lantern-left { top: 20%; left: -120px; }
+      .lantern-right { top: 20%; right: -120px; }
       @keyframes swing {
         0% { transform: rotate(-5deg); }
         100% { transform: rotate(5deg); }
@@ -284,12 +315,12 @@
         animation: toy-float 8s ease-in-out infinite;
         z-index: 0;
       }
-      .toy-1 { top: 5%; left: -15%; animation-delay: 0s; }
-      .toy-2 { top: 20%; right: -15%; animation-delay: 1s; }
-      .toy-3 { top: 40%; left: -18%; animation-delay: 2s; }
-      .toy-4 { top: 60%; right: -18%; animation-delay: 3s; }
-      .toy-5 { bottom: 20%; left: -15%; animation-delay: 4s; }
-      .toy-6 { bottom: 5%; right: -15%; animation-delay: 5s; }
+      .toy-1 { top: 5%; left: -25%; animation-delay: 0s; }
+      .toy-2 { top: 20%; right: -25%; animation-delay: 1s; }
+      .toy-3 { top: 40%; left: -28%; animation-delay: 2s; }
+      .toy-4 { top: 60%; right: -28%; animation-delay: 3s; }
+      .toy-5 { bottom: 20%; left: -25%; animation-delay: 4s; }
+      .toy-6 { bottom: 5%; right: -25%; animation-delay: 5s; }
       @keyframes toy-float {
         0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
         25% { transform: translateY(-15px) rotate(5deg) scale(1.1); }
