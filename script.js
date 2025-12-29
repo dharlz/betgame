@@ -1,4 +1,4 @@
-const { useState, useRef } = React;
+const { useState, useRef, useEffect } = React;
 
 // --- STRINGS ---
 
@@ -17,8 +17,8 @@ const STRINGS = {
         bet: 'CHOOSE YOUR LUCKY COLOR',
         roll: 'ROLL THE DICE!',
         next: 'NEXT ROUND',
-        win: 'JACKPOT! WINNER!',
-        lose: 'BAD LUCK!',
+        win: '🎉 JACKPOT! YOU WON! 🎉',
+        lose: '😥 SO CLOSE! TRY AGAIN! 😥',
         gameOver: 'MARKET CLOSED',
         playAgain: 'PLAY AGAIN',
         score: 'VICTORIES',
@@ -37,7 +37,14 @@ const STRINGS = {
         youWin: 'YOU WIN!',
         aiWins: 'AI WINS!',
         draw: 'IT\'S A TIE!',
-        vsAI: 'VS'
+        vsAI: 'VS',
+        // Night Market Exploration
+        explore: 'EXPLORE MARKET',
+        controls: 'Use Arrow Keys ← → to Move | Press SPACE to Interact',
+        pressSpace: 'Press SPACE to interact',
+        skip: 'SKIP >>',
+        continue: 'CONTINUE',
+        howToPlay: 'HOW TO PLAY'
     },
     zh: {
         title: '夜市',
@@ -53,8 +60,8 @@ const STRINGS = {
         bet: '選擇你的幸運顏色',
         roll: '擲骰子!',
         next: '下一輪',
-        win: '大獎! 贏家!',
-        lose: '運氣不好!',
+        win: '🎉 大獎! 你贏了! 🎉',
+        lose: '😥 差一點! 再試一次! 😥',
         gameOver: '夜市關閉',
         playAgain: '再玩一次',
         score: '勝利',
@@ -73,7 +80,13 @@ const STRINGS = {
         youWin: '你贏了！',
         aiWins: 'AI贏了！',
         draw: '平手！',
-        vsAI: 'VS'
+        vsAI: 'VS',
+        explore: '探索夜市',
+        controls: '使用方向鍵 ← → 移動 | 按空格鍵互動',
+        pressSpace: '按空格鍵互動',
+        skip: '跳過 >>',
+        continue: '繼續',
+        howToPlay: '如何玩'
     }
 };
 
@@ -89,7 +102,570 @@ const COLOR_BG = {
     pink: 'bg-pink-500'
 };
 
+// --- GAME STALLS DATA ---
+const GAME_STALLS = [
+    {
+        id: 'betgame',
+        name: '🔥 BET-O-BET 🔥',
+        nameZh: '🔥 賭色遊戲 🔥',
+        emoji: '🎲',
+        position: 500, // Centered position
+        dialogue: [
+            { speaker: '🎪 Lucky Vendor', text: "STEP RIGHT UP! 🎉 The LEGENDARY Color Dice awaits!" },
+            { speaker: '🎪 Lucky Vendor', text: "🔥 6 COLORS, 1 DESTINY! 🔥 Can YOU beat the odds?" },
+            { speaker: '🎪 Lucky Vendor', text: "💎 Choose your lucky color and WIN BIG PRIZES! 💰" },
+            { speaker: '🎪 Lucky Vendor', text: "⚡ Get 3 wins for a MEGA BONUS ROUND! ⚡ Are you BRAVE enough?" }
+        ],
+        dialogueZh: [
+            { speaker: '🎪 幸運攤販', text: "快來！🎉 傳說中的顏色骰子等你挑戰！" },
+            { speaker: '🎪 幸運攤販', text: "🔥 6種顏色，1次命運！🔥 你能戰勝機率嗎？" },
+            { speaker: '🎪 幸運攤販', text: "💎 選擇你的幸運顏色，贏得大獎！💰" },
+            { speaker: '🎪 幸運攤販', text: "⚡ 贏3次得到超級獎勵回合！⚡ 你夠勇敢嗎？" }
+        ],
+        instructions: [
+            "🎯 HOW TO WIN BIG:",
+            "1️⃣ Pick YOUR lucky color from 6 vibrant choices",
+            "2️⃣ Hit ROLL THE DICE and feel the excitement!",
+            "3️⃣ Match the color = INSTANT WIN! 💰",
+            "4️⃣ Win 3 rounds → Unlock MEGA BONUS ROUND! 🔥",
+            "5️⃣ You have 3 chances - make them COUNT!",
+            "⭐ LEGEND says: Those with courage WIN the most!"
+        ],
+        instructionsZh: [
+            "🎯 如何大獲全勝:",
+            "1️⃣ 從6種鮮豔顏色中選擇你的幸運色",
+            "2️⃣ 點擊擲骰子，感受刺激！",
+            "3️⃣ 顏色匹配 = 立即獲勝！💰",
+            "4️⃣ 贏得3輪 → 解鎖超級獎勵回合！🔥",
+            "5️⃣ 你有3次機會 - 把握每一次！",
+            "⭐ 傳說：勇敢的人贏得最多！"
+        ]
+    }
+];
+
 // --- COMPONENTS ---
+
+// Night Market Exploration Component
+const NightMarketExplorer = ({ lang, onSelectGame, onBack }) => {
+    const [playerPos, setPlayerPos] = useState(500); // Start in center
+    const [facingRight, setFacingRight] = useState(true);
+    const [isWalking, setIsWalking] = useState(false);
+    const [nearStall, setNearStall] = useState(null);
+    const [dialogueActive, setDialogueActive] = useState(false);
+    const [dialogueIndex, setDialogueIndex] = useState(0);
+    const [showInstructions, setShowInstructions] = useState(false);
+    const [currentStall, setCurrentStall] = useState(null);
+    
+    const t = STRINGS[lang];
+    
+    // Keyboard controls
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (dialogueActive || showInstructions) return;
+            
+            if (e.key === 'ArrowRight') {
+                setIsWalking(true);
+                setPlayerPos(p => Math.min(950, p + 20));
+                setFacingRight(true);
+            } else if (e.key === 'ArrowLeft') {
+                setIsWalking(true);
+                setPlayerPos(p => Math.max(50, p - 20));
+                setFacingRight(false);
+            } else if (e.key === ' ' && nearStall) {
+                e.preventDefault();
+                startInteraction(nearStall);
+            }
+        };
+        
+        const handleKeyUp = (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                setIsWalking(false);
+            }
+        };
+        
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keyup', handleKeyUp);
+        };
+    }, [dialogueActive, showInstructions, nearStall]);
+    
+    // Check if near any stall
+    useEffect(() => {
+        const nearby = GAME_STALLS.find(stall => 
+            Math.abs(playerPos - stall.position) < 80
+        );
+        setNearStall(nearby || null);
+    }, [playerPos]);
+    
+    const startInteraction = (stall) => {
+        setCurrentStall(stall);
+        setDialogueActive(true);
+        setDialogueIndex(0);
+    };
+    
+    const nextDialogue = () => {
+        const dialogues = lang === 'en' ? currentStall.dialogue : currentStall.dialogueZh;
+        if (dialogueIndex < dialogues.length - 1) {
+            setDialogueIndex(i => i + 1);
+        } else {
+            setDialogueActive(false);
+            setShowInstructions(true);
+        }
+    };
+    
+    const skipDialogue = () => {
+        setDialogueActive(false);
+        setShowInstructions(true);
+    };
+    
+    const startGame = () => {
+        if (currentStall.id === 'betgame') {
+            onSelectGame(currentStall.id);
+        } else {
+            // Game not available yet
+            setShowInstructions(false);
+            setCurrentStall(null);
+        }
+    };
+    
+    const closeInstructions = () => {
+        setShowInstructions(false);
+        setCurrentStall(null);
+    };
+    
+    const dialogues = currentStall ? (lang === 'en' ? currentStall.dialogue : currentStall.dialogueZh) : [];
+    const instructions = currentStall ? (lang === 'en' ? currentStall.instructions : currentStall.instructionsZh) : [];
+    
+    return (
+        <div className="w-full h-screen relative overflow-hidden">
+            {/* Night Sky with City Skyline */}
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-900 via-indigo-900 to-purple-900"></div>
+            
+            {/* City Buildings Silhouette */}
+            <div className="absolute top-0 left-0 right-0 h-1/2">
+                {/* Background buildings */}
+                {[...Array(12)].map((_, i) => (
+                    <div 
+                        key={i}
+                        className="absolute bottom-0 bg-gradient-to-b from-blue-800 to-blue-900 opacity-60"
+                        style={{
+                            left: `${i * 8 + Math.random() * 3}%`,
+                            width: `${60 + Math.random() * 40}px`,
+                            height: `${100 + Math.random() * 150}px`,
+                        }}
+                    >
+                        {/* Building windows */}
+                        <div className="absolute inset-0 grid grid-cols-3 gap-1 p-2">
+                            {[...Array(9)].map((_, w) => (
+                                <div key={w} className={`${Math.random() > 0.3 ? 'bg-yellow-400' : 'bg-transparent'} opacity-80 rounded-sm`}></div>
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </div>
+            
+            {/* Stars */}
+            <div className="absolute inset-0">
+                {[...Array(80)].map((_, i) => (
+                    <div 
+                        key={i}
+                        className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
+                        style={{
+                            left: `${Math.random() * 100}%`,
+                            top: `${Math.random() * 60}%`,
+                            animationDelay: `${Math.random() * 3}s`,
+                            opacity: 0.3 + Math.random() * 0.7
+                        }}
+                    />
+                ))}
+            </div>
+            
+            {/* Large Moon */}
+            <div className="absolute top-20 right-32 w-24 h-24 bg-yellow-100 rounded-full" style={{boxShadow: '0 0 80px rgba(255,255,200,0.9), 0 0 120px rgba(255,255,150,0.6)'}}></div>
+            
+            {/* String Lights Across Scene */}
+            <div className="absolute top-32 left-0 right-0 h-1">
+                <svg className="w-full h-32" style={{overflow: 'visible'}}>
+                    <path d="M 0,60 Q 200,40 400,60 T 800,60 T 1200,60" stroke="rgba(0,0,0,0.3)" strokeWidth="2" fill="none"/>
+                </svg>
+                {[...Array(20)].map((_, i) => (
+                    <div 
+                        key={i}
+                        className="absolute w-3 h-4 rounded-full animate-pulse"
+                        style={{
+                            left: `${i * 5}%`,
+                            top: `${20 + Math.sin(i * 0.5) * 10}px`,
+                            backgroundColor: ['#ff4444', '#ffaa00', '#44ff44', '#4444ff', '#ff44ff'][i % 5],
+                            boxShadow: `0 0 10px ${['#ff4444', '#ffaa00', '#44ff44', '#4444ff', '#ff44ff'][i % 5]}`,
+                            animationDelay: `${i * 0.1}s`
+                        }}
+                    />
+                ))}
+            </div>
+            
+            {/* Ground/Market Floor */}
+            <div className="absolute bottom-0 w-full h-64 bg-gradient-to-t from-gray-800 via-gray-700 to-transparent">
+                <div className="w-full h-full opacity-20" style={{backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(0,0,0,0.3) 50px, rgba(0,0,0,0.3) 51px)'}}></div>
+            </div>
+            
+            {/* Background People Silhouettes (Far away) */}
+            <div className="absolute bottom-32 left-0 right-0 h-32 opacity-40">
+                {[...Array(15)].map((_, i) => (
+                    <div 
+                        key={i}
+                        className="absolute bottom-0"
+                        style={{
+                            left: `${i * 6 + Math.random() * 4}%`,
+                            animation: `float ${3 + Math.random() * 2}s ease-in-out infinite`,
+                            animationDelay: `${Math.random() * 2}s`
+                        }}
+                    >
+                        <div className="text-2xl filter blur-sm opacity-60">🚶</div>
+                    </div>
+                ))}
+            </div>
+            
+            {/* Background Stalls (Other market stalls) */}
+            <div className="absolute bottom-28 left-0 right-0 flex justify-around opacity-50">
+                {/* Left background stalls */}
+                <div className="relative w-32 h-20 bg-gradient-to-br from-orange-600 to-red-600 rounded-t-lg border-2 border-yellow-500" style={{boxShadow: '0 0 20px rgba(255,100,0,0.5)'}}>
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 text-xs font-comic text-white">🍜 FOOD</div>
+                    <div className="absolute inset-0 flex items-center justify-center text-3xl">🍲</div>
+                </div>
+                
+                <div className="relative w-32 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-t-lg border-2 border-cyan-400" style={{boxShadow: '0 0 20px rgba(100,100,255,0.5)'}}>
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 text-xs font-comic text-white">🎯 GAMES</div>
+                    <div className="absolute inset-0 flex items-center justify-center text-3xl">🎪</div>
+                </div>
+                
+                <div className="relative w-32 h-20 bg-gradient-to-br from-pink-600 to-red-600 rounded-t-lg border-2 border-yellow-500" style={{boxShadow: '0 0 20px rgba(255,100,150,0.5)'}}>
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 text-xs font-comic text-white">🧸 TOYS</div>
+                    <div className="absolute inset-0 flex items-center justify-center text-3xl">🎁</div>
+                </div>
+            </div>
+            
+            {/* Mid-ground People Walking */}
+            <div className="absolute bottom-48 left-0 right-0">
+                {[...Array(8)].map((_, i) => (
+                    <div 
+                        key={i}
+                        className="absolute bottom-0 opacity-60"
+                        style={{
+                            left: `${10 + i * 10}%`,
+                            transform: `scale(${0.7 + Math.random() * 0.3})`,
+                            animation: `sway ${2 + Math.random() * 1}s ease-in-out infinite`,
+                            animationDelay: `${Math.random() * 2}s`
+                        }}
+                    >
+                        <div className="text-4xl">{['🚶', '🚶‍♀️', '🧍', '🧍‍♀️'][Math.floor(Math.random() * 4)]}</div>
+                    </div>
+                ))}
+            </div>
+            
+            {/* Market Entrance Sign */}
+            <div className="absolute top-24 left-1/2 transform -translate-x-1/2 z-10">
+                <div className="relative">
+                    {/* Glow effect behind sign */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 blur-xl opacity-60 animate-pulse"></div>
+                    {/* Main sign */}
+                    <div className="relative bg-gradient-to-r from-red-600 via-orange-600 to-red-600 border-8 border-yellow-400 px-16 py-8 rounded-2xl transform hover:rotate-0 transition-transform" style={{boxShadow: '0 10px 0 rgba(0,0,0,0.4), 0 0 60px rgba(255,215,0,0.7)'}}>
+                        <div className="font-comic text-6xl text-yellow-300 font-bold text-center animate-pulse" style={{textShadow: '5px 5px 0 #000, 0 0 30px rgba(255,215,0,0.8)'}}>
+                            🎪 {lang === 'en' ? 'NIGHT MARKET' : '夜市'} 🎪
+                        </div>
+                        {/* Decorative lights on sign */}
+                        <div className="absolute -top-2 left-4 right-4 flex justify-between">
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className="w-3 h-3 rounded-full bg-yellow-300 animate-pulse" style={{animationDelay: `${i * 0.2}s`, boxShadow: '0 0 10px rgba(255,255,0,0.9)'}}></div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {/* Main Game Stall - BET-O-BET */}
+            <div className="absolute bottom-48 w-full h-64 flex items-end justify-center">
+                {GAME_STALLS.map(stall => (
+                    <div 
+                        key={stall.id}
+                        className="relative transition-all duration-300"
+                    >
+                        {/* Stall Structure - Modern Redesign */}
+                        <div className="relative w-80">
+                            
+                            {/* Neon Sign Above */}
+                            <div className="absolute -top-32 left-1/2 transform -translate-x-1/2 w-72">
+                                <div className="bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 p-1 rounded-2xl" style={{boxShadow: '0 0 40px rgba(147,51,234,0.8), 0 0 80px rgba(236,72,153,0.6)'}}>
+                                    <div className="bg-black rounded-xl py-4 px-6">
+                                        <div className="font-comic text-4xl text-center bg-gradient-to-r from-yellow-300 via-pink-400 to-cyan-400 text-transparent bg-clip-text animate-pulse" style={{textShadow: '0 0 20px rgba(255,215,0,0.8)'}}>
+                                            {lang === 'en' ? stall.name : stall.nameZh}
+                                        </div>
+                                        {/* Neon glow effect */}
+                                        <div className="flex justify-center gap-1 mt-2">
+                                            {[...Array(8)].map((_, i) => (
+                                                <div key={i} className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" style={{animationDelay: `${i * 0.15}s`, boxShadow: '0 0 10px rgba(255,215,0,0.9)'}}></div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* HOT Badge */}
+                            <div className="absolute -top-20 -right-6 z-20">
+                                <div className="relative">
+                                    <div className="bg-red-600 text-yellow-300 font-comic text-xl px-4 py-2 rounded-full border-4 border-yellow-400 animate-bounce" style={{boxShadow: '0 0 30px rgba(255,215,0,0.9), 0 4px 0 rgba(0,0,0,0.5)'}}>
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-2xl">🔥</span>
+                                            <span>HOT!</span>
+                                            <span className="text-2xl">🔥</span>
+                                        </div>
+                                    </div>
+                                    {/* Sparkle effects */}
+                                    <div className="absolute -top-1 -left-1 text-xl animate-spin" style={{animationDuration: '3s'}}>✨</div>
+                                    <div className="absolute -bottom-1 -right-1 text-xl animate-spin" style={{animationDuration: '3s', animationDelay: '1.5s'}}>✨</div>
+                                </div>
+                            </div>
+
+                            {/* Prize Icons Floating */}
+                            <div className="absolute -top-16 left-4 text-3xl animate-float" style={{animationDuration: '2s'}}>💎</div>
+                            <div className="absolute -top-20 left-16 text-3xl animate-float" style={{animationDuration: '2.5s', animationDelay: '0.5s'}}>💰</div>
+                            <div className="absolute -top-16 right-16 text-3xl animate-float" style={{animationDuration: '2.3s', animationDelay: '1s'}}>🏆</div>
+                            <div className="absolute -top-20 right-4 text-3xl animate-float" style={{animationDuration: '2.7s', animationDelay: '0.3s'}}>⭐</div>
+                            
+                            {/* Main Stall Body */}
+                            <div className="relative">
+                                {/* Awning/Canopy */}
+                                <div className="absolute -top-8 -left-4 -right-4 h-16 bg-gradient-to-b from-red-600 via-red-500 to-red-600 rounded-t-3xl border-4 border-yellow-400" style={{boxShadow: '0 -4px 20px rgba(255,0,0,0.4), 0 4px 0 rgba(0,0,0,0.3)'}}>
+                                    {/* Striped pattern */}
+                                    <div className="absolute inset-0 flex rounded-t-3xl overflow-hidden opacity-30">
+                                        {[...Array(6)].map((_, i) => (
+                                            <div key={i} className={`flex-1 ${i % 2 === 0 ? 'bg-white' : ''}`}></div>
+                                        ))}
+                                    </div>
+                                    {/* Hanging decorations */}
+                                    <div className="absolute -bottom-3 left-8 w-3 h-6 bg-yellow-400 rounded-b-full animate-sway"></div>
+                                    <div className="absolute -bottom-3 left-20 w-3 h-6 bg-yellow-400 rounded-b-full animate-sway" style={{animationDelay: '0.2s'}}></div>
+                                    <div className="absolute -bottom-3 right-20 w-3 h-6 bg-yellow-400 rounded-b-full animate-sway" style={{animationDelay: '0.4s'}}></div>
+                                    <div className="absolute -bottom-3 right-8 w-3 h-6 bg-yellow-400 rounded-b-full animate-sway" style={{animationDelay: '0.6s'}}></div>
+                                </div>
+
+                                {/* Stall Front Panel */}
+                                <div className="relative w-80 h-64 bg-gradient-to-br from-purple-600 via-pink-600 to-red-600 rounded-2xl border-6 border-yellow-400 overflow-hidden" style={{boxShadow: '0 0 60px rgba(236,72,153,0.8), 0 0 100px rgba(147,51,234,0.6), 0 12px 0 rgba(0,0,0,0.4), inset 0 2px 20px rgba(255,255,255,0.2)'}}>
+                                    
+                                    {/* Animated background pattern */}
+                                    <div className="absolute inset-0 opacity-20">
+                                        <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: 'radial-gradient(circle, white 2px, transparent 2px)', backgroundSize: '40px 40px'}}></div>
+                                    </div>
+                                    
+                                    {/* Spotlight effects */}
+                                    <div className="absolute top-0 left-1/4 w-32 h-32 bg-yellow-300 rounded-full blur-3xl opacity-40 animate-pulse"></div>
+                                    <div className="absolute bottom-0 right-1/4 w-32 h-32 bg-cyan-300 rounded-full blur-3xl opacity-40 animate-pulse" style={{animationDelay: '1s'}}></div>
+                                    
+                                    {/* Dice Display - Center */}
+                                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                        <div className="relative">
+                                            {/* Glow ring behind dice */}
+                                            <div className="absolute inset-0 -m-8 rounded-full bg-gradient-to-r from-yellow-400 via-pink-400 to-cyan-400 blur-xl opacity-60 animate-spin" style={{animationDuration: '6s'}}></div>
+                                            {/* Dice */}
+                                            <div className="relative text-9xl animate-bounce filter drop-shadow-2xl" style={{animationDuration: '2s'}}>
+                                                {stall.emoji}
+                                            </div>
+                                            {/* Sparkles around dice */}
+                                            <div className="absolute -top-4 -left-4 text-3xl animate-ping" style={{animationDuration: '2s'}}>✨</div>
+                                            <div className="absolute -top-4 -right-4 text-3xl animate-ping" style={{animationDuration: '2s', animationDelay: '0.5s'}}>✨</div>
+                                            <div className="absolute -bottom-4 -left-4 text-3xl animate-ping" style={{animationDuration: '2s', animationDelay: '1s'}}>✨</div>
+                                            <div className="absolute -bottom-4 -right-4 text-3xl animate-ping" style={{animationDuration: '2s', animationDelay: '1.5s'}}>✨</div>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Decorative corners */}
+                                    <div className="absolute top-2 left-2 text-2xl">⭐</div>
+                                    <div className="absolute top-2 right-2 text-2xl">⭐</div>
+                                    <div className="absolute bottom-14 left-2 text-2xl">⭐</div>
+                                    <div className="absolute bottom-14 right-2 text-2xl">⭐</div>
+                                    
+                                    {/* Counter/Table at bottom */}
+                                    <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-b from-amber-600 to-amber-900 border-t-4 border-yellow-500">
+                                        <div className="flex justify-center items-center h-full gap-3 text-2xl">
+                                            <span className="animate-bounce" style={{animationDelay: '0s'}}>🎰</span>
+                                            <span className="animate-bounce" style={{animationDelay: '0.2s'}}>🎲</span>
+                                            <span className="animate-bounce" style={{animationDelay: '0.4s'}}>🎯</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Wooden Support Poles */}
+                                <div className="absolute -left-2 top-0 bottom-0 w-4 bg-gradient-to-b from-amber-700 to-amber-900 border-2 border-amber-950 rounded-full" style={{boxShadow: '2px 0 8px rgba(0,0,0,0.5)'}}></div>
+                                <div className="absolute -right-2 top-0 bottom-0 w-4 bg-gradient-to-b from-amber-700 to-amber-900 border-2 border-amber-950 rounded-full" style={{boxShadow: '-2px 0 8px rgba(0,0,0,0.5)'}}></div>
+                            </div>
+                            
+                            {/* Glow effect when near */}
+                            {nearStall?.id === stall.id && (
+                                <>
+                                    <div className="absolute inset-0 bg-yellow-300 opacity-30 rounded-2xl animate-pulse" style={{boxShadow: '0 0 60px rgba(255,255,0,0.9), 0 0 100px rgba(255,215,0,0.7)'}}></div>
+                                    <div className="absolute -top-48 left-1/2 transform -translate-x-1/2 text-5xl animate-bounce">
+                                        <div className="font-comic text-yellow-300 text-3xl mb-2" style={{textShadow: '2px 2px 0 #000'}}>PRESS SPACE!</div>
+                                        <div className="text-center">👇</div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
+            
+            {/* Player Character */}
+            <div 
+                className="absolute bottom-48 transition-all duration-200 ease-out z-10"
+                style={{ 
+                    left: `${playerPos}px`, 
+                    transform: `translateX(-50%) ${facingRight ? '' : 'scaleX(-1)'}` 
+                }}
+            >
+                <div className="text-6xl drop-shadow-lg">
+                    {isWalking ? '🏃' : '🧍'}
+                </div>
+            </div>
+            
+            {/* Foreground People (Walking in front) */}
+            <div className="absolute bottom-32 left-0 right-0 pointer-events-none">
+                {[...Array(5)].map((_, i) => (
+                    <div 
+                        key={i}
+                        className="absolute bottom-0 opacity-70"
+                        style={{
+                            left: `${5 + i * 18}%`,
+                            animation: `sway ${1.5 + Math.random() * 1}s ease-in-out infinite`,
+                            animationDelay: `${Math.random() * 1}s`,
+                            zIndex: 5
+                        }}
+                    >
+                        <div className="text-5xl filter drop-shadow-lg">{['🚶‍♂️', '🚶‍♀️', '🧍‍♂️', '🧍‍♀️', '👨‍👩‍👧'][i]}</div>
+                    </div>
+                ))}
+            </div>
+            
+            {/* Street Lamps */}
+            <div className="absolute bottom-48 left-20">
+                <div className="relative">
+                    <div className="w-2 h-32 bg-gray-700 mx-auto"></div>
+                    <div className="w-8 h-8 bg-yellow-300 rounded-full mx-auto -mt-1" style={{boxShadow: '0 0 40px rgba(255,255,150,0.9)'}}></div>
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-32 h-32 bg-yellow-200 rounded-full blur-2xl opacity-30"></div>
+                </div>
+            </div>
+            <div className="absolute bottom-48 right-20">
+                <div className="relative">
+                    <div className="w-2 h-32 bg-gray-700 mx-auto"></div>
+                    <div className="w-8 h-8 bg-yellow-300 rounded-full mx-auto -mt-1" style={{boxShadow: '0 0 40px rgba(255,255,150,0.9)'}}></div>
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-32 h-32 bg-yellow-200 rounded-full blur-2xl opacity-30"></div>
+                </div>
+            </div>
+            
+            {/* Vendor Character at stall */}
+            {GAME_STALLS.map(stall => (
+                <div 
+                    key={`vendor-${stall.id}`}
+                    className="absolute bottom-72 left-1/2 transform -translate-x-1/2 text-5xl animate-sway pointer-events-none"
+                >
+                    👨‍🍳
+                </div>
+            ))}
+            
+            {/* Controls HUD */}
+            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 px-6 py-3 rounded-lg border-2 border-yellow-400">
+                <p className="font-comic text-white text-center text-sm md:text-base">
+                    {t.controls}
+                </p>
+            </div>
+            
+            {/* Interaction Prompt */}
+            {nearStall && !dialogueActive && !showInstructions && (
+                <div className="absolute bottom-96 left-1/2 transform -translate-x-1/2 bg-yellow-400 px-6 py-3 rounded-lg border-4 border-black animate-bounce">
+                    <p className="font-comic text-black text-xl">
+                        {t.pressSpace}
+                    </p>
+                </div>
+            )}
+            
+            {/* Dialogue Box */}
+            {dialogueActive && currentStall && (
+                <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-11/12 max-w-3xl bg-black bg-opacity-90 border-4 border-yellow-400 rounded-lg p-6">
+                    <div className="mb-4">
+                        <p className="font-comic text-yellow-400 text-xl mb-2">
+                            {dialogues[dialogueIndex].speaker}
+                        </p>
+                        <p className="font-comic text-white text-2xl">
+                            {dialogues[dialogueIndex].text}
+                        </p>
+                    </div>
+                    <div className="flex gap-4 justify-end">
+                        <button 
+                            onClick={skipDialogue}
+                            className="btn-comic btn-comic-blue px-6 py-2"
+                        >
+                            {t.skip}
+                        </button>
+                        <button 
+                            onClick={nextDialogue}
+                            className="btn-comic px-6 py-2"
+                        >
+                            {dialogueIndex < dialogues.length - 1 ? t.continue : t.howToPlay}
+                        </button>
+                    </div>
+                </div>
+            )}
+            
+            {/* Instructions Screen */}
+            {showInstructions && currentStall && (
+                <div className="absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+                    <div className="panel-comic p-8 max-w-2xl w-11/12 max-h-[80vh] overflow-y-auto">
+                        <h2 className="font-comic text-4xl md:text-5xl text-yellow-400 mb-6 text-center">
+                            {lang === 'en' ? currentStall.name : currentStall.nameZh}
+                        </h2>
+                        <div className="text-center text-6xl mb-6">
+                            {currentStall.emoji}
+                        </div>
+                        <h3 className="font-comic text-2xl md:text-3xl text-yellow-400 mb-4">
+                            {t.howToPlay}
+                        </h3>
+                        <div className="bg-white bg-opacity-10 rounded-lg p-6 mb-6">
+                            {instructions.map((instruction, i) => (
+                                <p key={i} className="font-comic text-white text-lg md:text-xl mb-3">
+                                    {instruction}
+                                </p>
+                            ))}
+                        </div>
+                        <div className="flex gap-4">
+                            <button 
+                                onClick={closeInstructions}
+                                className="btn-comic btn-comic-blue flex-1 py-3"
+                            >
+                                {t.back}
+                            </button>
+                            {currentStall.id === 'betgame' && (
+                                <button 
+                                    onClick={startGame}
+                                    className="btn-comic flex-1 py-3"
+                                >
+                                    {t.start}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+            
+            {/* Back Button */}
+            <button 
+                onClick={onBack}
+                className="absolute top-4 left-4 btn-comic btn-comic-blue px-6 py-2"
+            >
+                {t.back}
+            </button>
+        </div>
+    );
+};
 
 const Die = ({ color, isRolling, targetColor }) => {
     // Angles to show specific face
@@ -141,13 +717,14 @@ const Die = ({ color, isRolling, targetColor }) => {
 
 const App = () => {
     const [lang, setLang] = useState('en');
-    const [screen, setScreen] = useState('menu'); // menu, modeSelect, setup, game, gameover, credits, tutorial
+    const [screen, setScreen] = useState('menu'); // menu, explore, modeSelect, setup, game, gameover, credits, tutorial
     const [gameMode, setGameMode] = useState('solo'); // 'solo' or 'ai'
     const [name, setName] = useState('');
     const [wins, setWins] = useState(0);
     const [round, setRound] = useState(1);
     const [isBonusRound, setIsBonusRound] = useState(false);
     const [bonusWon, setBonusWon] = useState(false);
+    const [selectedGameId, setSelectedGameId] = useState(null);
     
     // Game State
     const [selectedColor, setSelectedColor] = useState(null);
@@ -165,7 +742,14 @@ const App = () => {
     const t = STRINGS[lang];
 
     const handleStart = () => {
-        setScreen('modeSelect');
+        setScreen('explore'); // Changed to go to exploration first
+    };
+    
+    const handleGameSelected = (gameId) => {
+        setSelectedGameId(gameId);
+        if (gameId === 'betgame') {
+            setScreen('modeSelect');
+        }
     };
     
     const selectMode = (mode) => {
@@ -253,13 +837,23 @@ const App = () => {
     };
 
     const restart = () => {
-        setScreen('menu');
+        setScreen('explore'); // Changed to return to exploration
         setName('');
         setGameMode('solo');
+        setSelectedGameId(null);
     };
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center relative p-4">
+            
+            {/* --- EXPLORATION SCREEN --- */}
+            {screen === 'explore' && (
+                <NightMarketExplorer 
+                    lang={lang}
+                    onSelectGame={handleGameSelected}
+                    onBack={() => setScreen('menu')}
+                />
+            )}
             
             {/* --- MENU SCREEN --- */}
             {screen === 'menu' && (
@@ -316,7 +910,7 @@ const App = () => {
                             <div className="text-3xl mb-1">🤖</div>
                             {t.aiMode}
                         </button>
-                        <button onClick={() => setScreen('menu')} className="btn-comic btn-comic-blue py-2 mt-2">{t.back}</button>
+                        <button onClick={() => setScreen('explore')} className="btn-comic btn-comic-blue py-2 mt-2">{t.back}</button>
                     </div>
                 </div>
             )}
@@ -338,7 +932,7 @@ const App = () => {
                             autoFocus
                         />
                         <div className="flex gap-4">
-                            <button type="button" onClick={() => setScreen('modeSelect')} className="btn-comic btn-comic-blue flex-1 py-2">{t.back}</button>
+                            <button type="button" onClick={() => setScreen('explore')} className="btn-comic btn-comic-blue flex-1 py-2">{t.back}</button>
                             <button type="submit" disabled={!name} className="btn-comic flex-1 py-2">{t.start}</button>
                         </div>
                     </form>
@@ -418,12 +1012,23 @@ const App = () => {
                         {/* RESULT DISPLAY - Show winning color after roll */}
                         {!isRolling && lastResult !== null && (
                             <div className="mt-6 mb-4">
-                                <div className="bg-white border-4 border-black p-4 rounded-lg transform -rotate-1">
+                                {lastResult === 'win' && (
+                                    <div className="text-center mb-4 animate-bounce">
+                                        <div className="text-6xl mb-2">🎊🎉🏆🎉🎊</div>
+                                        <div className="text-5xl">💰💎✨💎💰</div>
+                                    </div>
+                                )}
+                                {lastResult === 'lose' && (
+                                    <div className="text-center mb-4 animate-pulse">
+                                        <div className="text-6xl mb-2">😢💔😢</div>
+                                    </div>
+                                )}
+                                <div className={`border-4 border-black p-4 rounded-lg transform -rotate-1 ${lastResult === 'win' ? 'bg-yellow-300 animate-pulse' : 'bg-white'}`} style={lastResult === 'win' ? {boxShadow: '0 0 30px rgba(255,215,0,0.9), 8px 8px 0 rgba(0,0,0,0.5)'} : {}}>
                                     <p className="font-comic text-black text-xl mb-2">
                                         {lang === 'en' ? 'WINNING COLOR:' : '中獎顏色:'}
                                     </p>
                                     <div className="flex items-center justify-center gap-3">
-                                        <div className={`w-16 h-16 rounded-lg ${COLOR_BG[diceResult]} border-4 border-black shadow-lg`}></div>
+                                        <div className={`w-16 h-16 rounded-lg ${COLOR_BG[diceResult]} border-4 border-black shadow-lg ${lastResult === 'win' ? 'animate-spin' : ''}`}></div>
                                         <p className="font-comic text-3xl text-black uppercase">{diceResult}</p>
                                     </div>
                                 </div>
@@ -433,7 +1038,12 @@ const App = () => {
                         {/* CONTROLS */}
                         {!isRolling && lastResult === null && (
                             <div className="mt-6">
-                                <p className="text-center font-comic text-2xl md:text-3xl mb-4">{t.bet}</p>
+                                <div className="text-center mb-6 animate-bounce">
+                                    <p className="font-comic text-3xl md:text-4xl mb-2 text-yellow-300" style={{textShadow: '3px 3px 0 #000, 0 0 20px rgba(255,215,0,0.8)'}}>
+                                        {t.bet}
+                                    </p>
+                                    <p className="font-comic text-lg text-yellow-400">💰 {lang === 'en' ? 'Pick Your Lucky Color!' : '選擇你的幸運色！'} 💰</p>
+                                </div>
                                 <div className="grid grid-cols-3 gap-4 mb-6">
                                     {COLORS.map(c => (
                                         <button 
@@ -446,9 +1056,10 @@ const App = () => {
                                 <button 
                                     onClick={rollDice} 
                                     disabled={!selectedColor}
-                                    className="btn-comic w-full py-4 text-3xl md:text-4xl"
+                                    className={`btn-comic w-full py-4 text-3xl md:text-4xl ${selectedColor ? 'animate-pulse' : 'opacity-50'}`}
+                                    style={selectedColor ? {boxShadow: '0 0 20px rgba(255,215,0,0.8), 0 8px 0 #000'} : {}}
                                 >
-                                    {t.roll}
+                                    🎲 {t.roll} 🎲
                                 </button>
                             </div>
                         )}
@@ -536,7 +1147,10 @@ const App = () => {
                     <button onClick={restart} className="btn-comic w-full py-3">
                         {t.playAgain}
                     </button>
-                    <button onClick={() => setScreen('menu')} className="btn-comic btn-comic-blue w-full py-3 mt-4">
+                    <button onClick={() => setScreen('explore')} className="btn-comic btn-comic-blue w-full py-3 mt-4">
+                        {t.explore}
+                    </button>
+                    <button onClick={() => setScreen('menu')} className="btn-comic btn-comic-blue w-full py-3 mt-2">
                         {t.exit}
                     </button>
                 </div>
