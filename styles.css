@@ -357,26 +357,7 @@
         100% { transform: rotate(5deg); }
       }
 
-      /* Night Market Toys */
-      .toy-pic {
-        position: absolute;
-        font-size: 3.5rem;
-        pointer-events: none;
-        animation: toy-float 8s ease-in-out infinite;
-        z-index: 0;
-      }
-      .toy-1 { top: 5%; left: -25%; animation-delay: 0s; }
-      .toy-2 { top: 20%; right: -25%; animation-delay: 1s; }
-      .toy-3 { top: 40%; left: -28%; animation-delay: 2s; }
-      .toy-4 { top: 60%; right: -28%; animation-delay: 3s; }
-      .toy-5 { bottom: 20%; left: -25%; animation-delay: 4s; }
-      .toy-6 { bottom: 5%; right: -25%; animation-delay: 5s; }
-      @keyframes toy-float {
-        0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
-        25% { transform: translateY(-15px) rotate(5deg) scale(1.1); }
-        50% { transform: translateY(-25px) rotate(0deg) scale(1.15); }
-        75% { transform: translateY(-15px) rotate(-5deg) scale(1.1); }
-      }
+      /* Night Market Toys - Removed floating toys for cleaner look */
 
       /* Cartoon Vendor */
       .cartoon-vendor {
@@ -402,14 +383,7 @@
         border: 2px solid #000;
       }
 
-      /* Setup Ambiance */
-      .setup-toy {
-        position: absolute;
-        font-size: 3rem;
-        animation: toy-float 5s ease-in-out infinite;
-      }
-      .setup-toy-1 { top: -40px; left: -40px; animation-delay: 0s; }
-      .setup-toy-2 { top: -40px; right: -40px; animation-delay: 2.5s; }
+      /* Setup Ambiance - Removed floating toys */
 
       /* Game Ambiance */
       .game-lantern {
@@ -423,13 +397,7 @@
       }
       .game-lantern-left { left: -60px; }
       .game-lantern-right { right: -60px; }
-      .game-toy {
-        position: absolute;
-        font-size: 3rem;
-        animation: toy-float 6s ease-in-out infinite;
-      }
-      .game-toy-1 { top: 0; left: -80px; animation-delay: 0s; }
-      .game-toy-2 { top: 0; right: -80px; animation-delay: 3s; }
+      /* Game toys - Removed floating toys */
 
       /* Color Swatches */
       .swatch {

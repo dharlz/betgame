@@ -4,9 +4,9 @@ const { useState, useRef, useEffect } = React;
 
 const STRINGS = {
     en: {
-        title: 'NIGHT MARKET',
+        title: 'BET-0-BET',
         subtitle: 'BET-0-BET',
-        play: 'ENTER THE MARKET',
+        play: 'ENTER GAME',
         options: 'SETTINGS',
         credits: 'DEVELOPERS',
         tutorial: 'GAME RULES',
@@ -19,7 +19,7 @@ const STRINGS = {
         next: 'NEXT ROUND',
         win: '🎉 JACKPOT! YOU WON! 🎉',
         lose: '😥 SO CLOSE! TRY AGAIN! 😥',
-        gameOver: 'MARKET CLOSED',
+        gameOver: 'GAME OVER',
         playAgain: 'PLAY AGAIN',
         score: 'VICTORIES',
         yourChoice: 'YOUR CHOICE',
@@ -41,8 +41,7 @@ const STRINGS = {
         aiWins: 'AI WINS!',
         draw: 'IT\'S A TIE!',
         vsAI: 'VS',
-        // Night Market Exploration
-        explore: 'EXPLORE MARKET',
+        explore: '探索',
         controls: 'Use Arrow Keys ← → to Move | Press SPACE to Interact',
         pressSpace: 'Press SPACE to interact',
         skip: 'SKIP >>',
@@ -50,9 +49,9 @@ const STRINGS = {
         howToPlay: 'HOW TO PLAY'
     },
     zh: {
-        title: '夜市',
+        title: 'BET-0-BET',
         subtitle: 'BET-0-BET',
-        play: '進入夜市',
+        play: '進入遊戲',
         options: '設置',
         credits: '開發者',
         tutorial: '遊戲規則',
@@ -65,7 +64,7 @@ const STRINGS = {
         next: '下一輪',
         win: '🎉 大獎! 你贏了! 🎉',
         lose: '😥 差一點! 再試一次! 😥',
-        gameOver: '夜市關閉',
+        gameOver: '遊戲結束',
         playAgain: '再玩一次',
         score: '勝利',
         yourChoice: '你的選擇',
@@ -108,25 +107,25 @@ const COLOR_BG = {
     pink: 'bg-pink-500'
 };
 
-// --- GAME STALLS DATA ---
-const GAME_STALLS = [
+// --- GAME DATA ---
+const GAME_DATA = [
     {
         id: 'betgame',
-        name: '🔥 BET-O-BET 🔥',
-        nameZh: '🔥 賭色遊戲 🔥',
+        name: 'BET-O-BET',
+        nameZh: '賭色遊戲',
         emoji: '🎲',
         position: 500, // Centered position
         dialogue: [
-            { speaker: '🎪 Lucky Vendor', text: "STEP RIGHT UP! 🎉 The LEGENDARY Color Dice awaits!" },
+            { speaker: '🎪 Game Host', text: "STEP RIGHT UP! 🎉 The LEGENDARY Color Dice awaits!" },
             { speaker: '🎪 Lucky Vendor', text: "🔥 6 COLORS, 1 DESTINY! 🔥 Can YOU beat the odds?" },
             { speaker: '🎪 Lucky Vendor', text: "💎 Choose your lucky color and WIN BIG PRIZES! 💰" },
             { speaker: '🎪 Lucky Vendor', text: "⚡ Get 3 wins for a MEGA BONUS ROUND! ⚡ Are you BRAVE enough?" }
         ],
         dialogueZh: [
-            { speaker: '🎪 幸運攤販', text: "快來！🎉 傳說中的顏色骰子等你挑戰！" },
-            { speaker: '🎪 幸運攤販', text: "🔥 6種顏色，1次命運！🔥 你能戰勝機率嗎？" },
-            { speaker: '🎪 幸運攤販', text: "💎 選擇你的幸運顏色，贏得大獎！💰" },
-            { speaker: '🎪 幸運攤販', text: "⚡ 贏3次得到超級獎勵回合！⚡ 你夠勇敢嗎？" }
+            { speaker: '🎪 遊戲主持', text: "快來！🎉 傳說中的顏色骰子等你挑戰！" },
+            { speaker: '🎪 遊戲主持', text: "🔥 6種顏色，1次命運！🔥 你能戰勝機率嗎？" },
+            { speaker: '🎪 遊戲主持', text: "💎 選擇你的幸運顏色，贏得大獎！💰" },
+            { speaker: '🎪 遊戲主持', text: "⚡ 贏3次得到超級獎勵回合！⚡ 你夠勇敢嗎？" }
         ],
         instructions: [
             "🎯 HOW TO WIN BIG:",
@@ -151,16 +150,16 @@ const GAME_STALLS = [
 
 // --- COMPONENTS ---
 
-// Night Market Exploration Component
+// Night Market Explorer Component
 const NightMarketExplorer = ({ lang, onSelectGame, onBack }) => {
     const [playerPos, setPlayerPos] = useState(500); // Start in center
     const [facingRight, setFacingRight] = useState(true);
     const [isWalking, setIsWalking] = useState(false);
-    const [nearStall, setNearStall] = useState(null);
+    const [nearGame, setNearGame] = useState(null);
     const [dialogueActive, setDialogueActive] = useState(false);
     const [dialogueIndex, setDialogueIndex] = useState(0);
     const [showInstructions, setShowInstructions] = useState(false);
-    const [currentStall, setCurrentStall] = useState(null);
+    const [currentGame, setCurrentGame] = useState(null);
     
     const t = STRINGS[lang];
     
@@ -177,9 +176,9 @@ const NightMarketExplorer = ({ lang, onSelectGame, onBack }) => {
                 setIsWalking(true);
                 setPlayerPos(p => Math.max(50, p - 20));
                 setFacingRight(false);
-            } else if (e.key === ' ' && nearStall) {
+            } else if (e.key === ' ' && nearGame) {
                 e.preventDefault();
-                startInteraction(nearStall);
+                startInteraction(nearGame);
             }
         };
         
@@ -195,24 +194,24 @@ const NightMarketExplorer = ({ lang, onSelectGame, onBack }) => {
             window.removeEventListener('keydown', handleKeyDown);
             window.removeEventListener('keyup', handleKeyUp);
         };
-    }, [dialogueActive, showInstructions, nearStall]);
+    }, [dialogueActive, showInstructions, nearGame]);
     
-    // Check if near any stall
+    // Check if near any game
     useEffect(() => {
-        const nearby = GAME_STALLS.find(stall => 
-            Math.abs(playerPos - stall.position) < 80
+        const nearby = GAME_DATA.find(game => 
+            Math.abs(playerPos - game.position) < 80
         );
-        setNearStall(nearby || null);
+        setNearGame(nearby || null);
     }, [playerPos]);
     
-    const startInteraction = (stall) => {
-        setCurrentStall(stall);
+    const startInteraction = (game) => {
+        setCurrentGame(game);
         setDialogueActive(true);
         setDialogueIndex(0);
     };
     
     const nextDialogue = () => {
-        const dialogues = lang === 'en' ? currentStall.dialogue : currentStall.dialogueZh;
+        const dialogues = lang === 'en' ? currentGame.dialogue : currentGame.dialogueZh;
         if (dialogueIndex < dialogues.length - 1) {
             setDialogueIndex(i => i + 1);
         } else {
@@ -227,49 +226,77 @@ const NightMarketExplorer = ({ lang, onSelectGame, onBack }) => {
     };
     
     const startGame = () => {
-        if (currentStall.id === 'betgame') {
-            onSelectGame(currentStall.id);
+        if (currentGame.id === 'betgame') {
+            onSelectGame(currentGame.id);
         } else {
             // Game not available yet
             setShowInstructions(false);
-            setCurrentStall(null);
+            setCurrentGame(null);
         }
     };
     
     const closeInstructions = () => {
         setShowInstructions(false);
-        setCurrentStall(null);
+        setCurrentGame(null);
     };
     
-    const dialogues = currentStall ? (lang === 'en' ? currentStall.dialogue : currentStall.dialogueZh) : [];
-    const instructions = currentStall ? (lang === 'en' ? currentStall.instructions : currentStall.instructionsZh) : [];
+    const dialogues = currentGame ? (lang === 'en' ? currentGame.dialogue : currentGame.dialogueZh) : [];
+    const instructions = currentGame ? (lang === 'en' ? currentGame.instructions : currentGame.instructionsZh) : [];
     
     return (
         <div className="w-full h-screen relative overflow-hidden">
             {/* Night Sky with City Skyline */}
             <div className="absolute inset-0 bg-gradient-to-b from-blue-900 via-indigo-900 to-purple-900"></div>
             
-            {/* City Buildings Silhouette */}
-            <div className="absolute top-0 left-0 right-0 h-1/2">
-                {/* Background buildings */}
-                {[...Array(12)].map((_, i) => (
-                    <div 
-                        key={i}
-                        className="absolute bottom-0 bg-gradient-to-b from-blue-800 to-blue-900 opacity-60"
-                        style={{
-                            left: `${i * 8 + Math.random() * 3}%`,
-                            width: `${60 + Math.random() * 40}px`,
-                            height: `${100 + Math.random() * 150}px`,
-                        }}
-                    >
-                        {/* Building windows */}
-                        <div className="absolute inset-0 grid grid-cols-3 gap-1 p-2">
-                            {[...Array(9)].map((_, w) => (
-                                <div key={w} className={`${Math.random() > 0.3 ? 'bg-yellow-400' : 'bg-transparent'} opacity-80 rounded-sm`}></div>
-                            ))}
+            {/* City Buildings Skyline - Enhanced */}
+            <div className="absolute bottom-0 left-0 right-0 h-full">
+                {/* Modern skyscrapers in background */}
+                {[...Array(15)].map((_, i) => {
+                    const height = 250 + Math.random() * 300;
+                    const width = 60 + Math.random() * 80;
+                    const left = i * 6.5;
+                    return (
+                        <div 
+                            key={i}
+                            className="absolute bottom-0 transition-all duration-1000"
+                            style={{
+                                left: `${left}%`,
+                                width: `${width}px`,
+                                height: `${height}px`,
+                            }}
+                        >
+                            {/* Building body with gradient */}
+                            <div className="absolute inset-0 bg-gradient-to-b from-indigo-800 via-blue-900 to-gray-900 border-l border-r border-blue-700 opacity-80">
+                                {/* Antenna on tallest buildings */}
+                                {height > 450 && (
+                                    <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-1 h-8 bg-red-500">
+                                        <div className="absolute top-0 w-2 h-2 bg-red-500 rounded-full animate-pulse" style={{left: '-0.125rem'}}></div>
+                                    </div>
+                                )}
+                                
+                                {/* Windows grid */}
+                                <div className="absolute inset-0 grid grid-cols-3 gap-1 p-2">
+                                    {[...Array(Math.floor(height / 20) * 3)].map((_, w) => (
+                                        <div 
+                                            key={w} 
+                                            className={`${
+                                                Math.random() > 0.3 ? 'bg-yellow-300' : 
+                                                Math.random() > 0.5 ? 'bg-blue-300' : 'bg-transparent'
+                                            } opacity-70 rounded-sm transition-opacity duration-1000`}
+                                            style={{
+                                                animationDelay: `${Math.random() * 5}s`,
+                                                boxShadow: Math.random() > 0.5 ? '0 0 8px rgba(255,255,150,0.6)' : 'none'
+                                            }}
+                                        ></div>
+                                    ))}
+                                </div>
+                                
+                                {/* Rooftop */}
+                                <div className="absolute -top-2 left-0 right-0 h-2 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700"></div>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
             
             {/* Stars */}
@@ -291,6 +318,42 @@ const NightMarketExplorer = ({ lang, onSelectGame, onBack }) => {
             {/* Large Moon */}
             <div className="absolute top-20 right-32 w-24 h-24 bg-yellow-100 rounded-full" style={{boxShadow: '0 0 80px rgba(255,255,200,0.9), 0 0 120px rgba(255,255,150,0.6)'}}></div>
             
+            {/* Falling Snow Effect */}
+            <div className="absolute inset-0 pointer-events-none">
+                {[...Array(60)].map((_, i) => (
+                    <div
+                        key={i}
+                        className="absolute bg-white rounded-full"
+                        style={{
+                            width: `${2 + Math.random() * 3}px`,
+                            height: `${2 + Math.random() * 3}px`,
+                            left: `${Math.random() * 100}%`,
+                            top: `-20px`,
+                            animation: `snowfall ${8 + Math.random() * 15}s linear infinite`,
+                            animationDelay: `${Math.random() * 8}s`,
+                            opacity: 0.7 + Math.random() * 0.3,
+                            boxShadow: '0 0 5px rgba(255,255,255,0.8)'
+                        }}
+                    ></div>
+                ))}
+            </div>
+            
+            <style>{`
+                @keyframes snowfall {
+                    0% {
+                        transform: translateY(0) translateX(0) rotate(0deg);
+                        opacity: 0.8;
+                    }
+                    50% {
+                        opacity: 0.9;
+                    }
+                    100% {
+                        transform: translateY(100vh) translateX(${Math.random() * 100 - 50}px) rotate(360deg);
+                        opacity: 0;
+                    }
+                }
+            `}</style>
+            
             {/* String Lights Across Scene */}
             <div className="absolute top-32 left-0 right-0 h-1">
                 <svg className="w-full h-32" style={{overflow: 'visible'}}>
@@ -311,43 +374,60 @@ const NightMarketExplorer = ({ lang, onSelectGame, onBack }) => {
                 ))}
             </div>
             
-            {/* Ground/Market Floor */}
+            {/* Ground */}
             <div className="absolute bottom-0 w-full h-64 bg-gradient-to-t from-gray-800 via-gray-700 to-transparent">
                 <div className="w-full h-full opacity-20" style={{backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(0,0,0,0.3) 50px, rgba(0,0,0,0.3) 51px)'}}></div>
             </div>
             
-            {/* Background Stalls (Other market stalls) */}
-            <div className="absolute bottom-28 left-0 right-0 flex justify-around opacity-50">
-                {/* Left background stalls */}
-                <div className="relative w-32 h-20 bg-gradient-to-br from-orange-600 to-red-600 rounded-t-lg border-2 border-yellow-500" style={{boxShadow: '0 0 20px rgba(255,100,0,0.5)'}}>
-                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 text-xs font-comic text-white">🍜 FOOD</div>
-                    <div className="absolute inset-0 flex items-center justify-center text-3xl">🍲</div>
+            {/* Background Stalls - More Vibrant */}
+            <div className="absolute bottom-28 left-0 right-0 flex justify-around opacity-60">
+                {/* Food Stall */}
+                <div className="relative w-36 h-24 bg-gradient-to-br from-orange-600 to-red-600 rounded-t-xl border-4 border-yellow-500 shadow-2xl" style={{boxShadow: '0 0 30px rgba(255,100,0,0.7)'}}>
+                    <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-sm font-comic text-yellow-300 font-bold" style={{textShadow: '2px 2px 0 #000'}}>🍜 FOOD 🍜</div>
+                    <div className="absolute inset-0 flex items-center justify-center text-4xl">🍲</div>
+                    <div className="absolute bottom-1 left-0 right-0 flex justify-around">
+                        {[...Array(5)].map((_, i) => (
+                            <div key={i} className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" style={{animationDelay: `${i * 0.3}s`}}></div>
+                        ))}
+                    </div>
                 </div>
                 
-                <div className="relative w-32 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-t-lg border-2 border-cyan-400" style={{boxShadow: '0 0 20px rgba(100,100,255,0.5)'}}>
-                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 text-xs font-comic text-white">🎯 GAMES</div>
-                    <div className="absolute inset-0 flex items-center justify-center text-3xl">🎪</div>
+                {/* Prize Stall */}
+                <div className="relative w-36 h-24 bg-gradient-to-br from-blue-600 to-purple-600 rounded-t-xl border-4 border-cyan-400 shadow-2xl" style={{boxShadow: '0 0 30px rgba(100,100,255,0.7)'}}>
+                    <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-sm font-comic text-cyan-300 font-bold" style={{textShadow: '2px 2px 0 #000'}}>🎯 PRIZES 🎯</div>
+                    <div className="absolute inset-0 flex items-center justify-center text-4xl">🎪</div>
+                    <div className="absolute bottom-1 left-0 right-0 flex justify-around">
+                        {[...Array(5)].map((_, i) => (
+                            <div key={i} className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" style={{animationDelay: `${i * 0.3}s`}}></div>
+                        ))}
+                    </div>
                 </div>
                 
-                <div className="relative w-32 h-20 bg-gradient-to-br from-pink-600 to-red-600 rounded-t-lg border-2 border-yellow-500" style={{boxShadow: '0 0 20px rgba(255,100,150,0.5)'}}>
-                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 text-xs font-comic text-white">🧸 TOYS</div>
-                    <div className="absolute inset-0 flex items-center justify-center text-3xl">🎁</div>
+                {/* Toy Stall */}
+                <div className="relative w-36 h-24 bg-gradient-to-br from-pink-600 to-red-600 rounded-t-xl border-4 border-yellow-500 shadow-2xl" style={{boxShadow: '0 0 30px rgba(255,100,150,0.7)'}}>
+                    <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-sm font-comic text-pink-300 font-bold" style={{textShadow: '2px 2px 0 #000'}}>🧸 TOYS 🧸</div>
+                    <div className="absolute inset-0 flex items-center justify-center text-4xl">🎁</div>
+                    <div className="absolute bottom-1 left-0 right-0 flex justify-around">
+                        {[...Array(5)].map((_, i) => (
+                            <div key={i} className="w-2 h-2 rounded-full bg-pink-400 animate-pulse" style={{animationDelay: `${i * 0.3}s`}}></div>
+                        ))}
+                    </div>
                 </div>
             </div>
             
-            {/* Market Entrance Sign */}
+            {/* Entrance Sign */}
             <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-10">
                 <div className="relative">
                     {/* Glow effect behind sign */}
                     <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 blur-xl opacity-60 animate-pulse"></div>
                     {/* Main sign */}
-                    <div className="relative bg-gradient-to-r from-red-600 via-orange-600 to-red-600 border-6 border-yellow-400 px-8 py-3 rounded-2xl transform hover:rotate-0 transition-transform" style={{boxShadow: '0 8px 0 rgba(0,0,0,0.4), 0 0 40px rgba(255,215,0,0.7)'}}>
-                        <div className="font-comic text-3xl text-yellow-300 font-bold text-center animate-pulse" style={{textShadow: '3px 3px 0 #000, 0 0 20px rgba(255,215,0,0.8)'}}>
-                            🎪 {lang === 'en' ? 'NIGHT MARKET' : '夜市'} 🎪
+                    <div className="relative bg-gradient-to-r from-red-600 via-orange-600 to-red-600 border-6 border-yellow-400 px-12 py-4 rounded-2xl transform hover:rotate-0 transition-transform" style={{boxShadow: '0 8px 0 rgba(0,0,0,0.4), 0 0 40px rgba(255,215,0,0.7)'}}>
+                        <div className="font-comic text-4xl text-yellow-300 font-bold text-center animate-pulse" style={{textShadow: '3px 3px 0 #000, 0 0 20px rgba(255,215,0,0.8)'}}>
+                            🎪 BET-0-BET 🎪
                         </div>
                         {/* Decorative lights on sign */}
                         <div className="absolute -top-2 left-4 right-4 flex justify-between">
-                            {[...Array(6)].map((_, i) => (
+                            {[...Array(8)].map((_, i) => (
                                 <div key={i} className="w-3 h-3 rounded-full bg-yellow-300 animate-pulse" style={{animationDelay: `${i * 0.2}s`, boxShadow: '0 0 10px rgba(255,255,0,0.9)'}}></div>
                             ))}
                         </div>
@@ -355,90 +435,64 @@ const NightMarketExplorer = ({ lang, onSelectGame, onBack }) => {
                 </div>
             </div>
             
-            {/* Main Game Stall - BET-O-BET */}
+            {/* Main Game - BET-O-BET */}
             <div className="absolute bottom-48 w-full h-64 flex items-end justify-center">
-                {GAME_STALLS.map(stall => (
+                {GAME_DATA.map(game => (
                     <div 
-                        key={stall.id}
+                        key={game.id}
                         className="relative transition-all duration-300"
                     >
-                        {/* Stall Structure - Modern Redesign */}
-                        <div className="relative w-80">
+                        {/* Stall Design - Clean and Attractive */}
+                        <div className="relative w-96">
                             
-                            {/* Neon Sign Above */}
-                            <div className="absolute -top-32 left-1/2 transform -translate-x-1/2 w-72">
-                                <div className="bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 p-1 rounded-2xl" style={{boxShadow: '0 0 40px rgba(147,51,234,0.8), 0 0 80px rgba(236,72,153,0.6)'}}>
-                                    <div className="bg-black rounded-xl py-4 px-6">
-                                        <div className="font-comic text-4xl text-center bg-gradient-to-r from-yellow-300 via-pink-400 to-cyan-400 text-transparent bg-clip-text animate-pulse" style={{textShadow: '0 0 20px rgba(255,215,0,0.8)'}}>
-                                            {lang === 'en' ? stall.name : stall.nameZh}
+                            {/* Single Neon Sign - Clean Design */}
+                            <div className="absolute -top-28 left-1/2 transform -translate-x-1/2 w-80">
+                                <div className="relative">
+                                    {/* Neon glow background */}
+                                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 blur-xl opacity-70 animate-pulse"></div>
+                                    {/* Sign board */}
+                                    <div className="relative bg-gradient-to-br from-gray-900 to-black rounded-2xl p-6 border-4 border-yellow-400" style={{boxShadow: '0 0 30px rgba(255,215,0,0.6), inset 0 2px 10px rgba(255,255,255,0.1)'}}>
+                                        <div className="font-comic text-5xl font-bold text-center" style={{
+                                            background: 'linear-gradient(45deg, #ffd700, #ffed4e, #ffd700)',
+                                            WebkitBackgroundClip: 'text',
+                                            WebkitTextFillColor: 'transparent',
+                                            textShadow: '0 0 40px rgba(255,215,0,0.8)',
+                                            filter: 'drop-shadow(0 0 20px rgba(255,215,0,0.6))'
+                                        }}>
+                                            {lang === 'en' ? game.name : game.nameZh}
                                         </div>
-                                        {/* Neon glow effect */}
-                                        <div className="flex justify-center gap-1 mt-2">
-                                            {[...Array(8)].map((_, i) => (
-                                                <div key={i} className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" style={{animationDelay: `${i * 0.15}s`, boxShadow: '0 0 10px rgba(255,215,0,0.9)'}}></div>
+                                        {/* Decorative lights */}
+                                        <div className="absolute -bottom-2 left-0 right-0 flex justify-around">
+                                            {[...Array(5)].map((_, i) => (
+                                                <div key={i} className="w-3 h-3 rounded-full bg-yellow-300 animate-pulse" style={{animationDelay: `${i * 0.2}s`, boxShadow: '0 0 15px rgba(255,215,0,0.9)'}}></div>
                                             ))}
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             
-                            {/* HOT Badge */}
-                            <div className="absolute -top-20 -right-6 z-20">
-                                <div className="relative">
-                                    <div className="bg-red-600 text-yellow-300 font-comic text-xl px-4 py-2 rounded-full border-4 border-yellow-400 animate-bounce" style={{boxShadow: '0 0 30px rgba(255,215,0,0.9), 0 4px 0 rgba(0,0,0,0.5)'}}>
-                                        <div className="flex items-center gap-1">
-                                            <span className="text-2xl">🔥</span>
-                                            <span>HOT!</span>
-                                            <span className="text-2xl">🔥</span>
-                                        </div>
-                                    </div>
-                                    {/* Sparkle effects */}
-                                    <div className="absolute -top-1 -left-1 text-xl animate-spin" style={{animationDuration: '3s'}}>✨</div>
-                                    <div className="absolute -bottom-1 -right-1 text-xl animate-spin" style={{animationDuration: '3s', animationDelay: '1.5s'}}>✨</div>
-                                </div>
-                            </div>
-
-                            {/* Prize Icons Floating */}
-                            <div className="absolute -top-16 left-4 text-3xl animate-float" style={{animationDuration: '2s'}}>💎</div>
-                            <div className="absolute -top-20 left-16 text-3xl animate-float" style={{animationDuration: '2.5s', animationDelay: '0.5s'}}>💰</div>
-                            <div className="absolute -top-16 right-16 text-3xl animate-float" style={{animationDuration: '2.3s', animationDelay: '1s'}}>🏆</div>
-                            <div className="absolute -top-20 right-4 text-3xl animate-float" style={{animationDuration: '2.7s', animationDelay: '0.3s'}}>⭐</div>
-                            
-                            {/* Main Stall Body */}
+                            {/* Stall Structure */}
                             <div className="relative">
-                                {/* Awning/Canopy */}
-                                <div className="absolute -top-8 -left-4 -right-4 h-16 bg-gradient-to-b from-red-600 via-red-500 to-red-600 rounded-t-3xl border-4 border-yellow-400" style={{boxShadow: '0 -4px 20px rgba(255,0,0,0.4), 0 4px 0 rgba(0,0,0,0.3)'}}>
-                                    {/* Striped pattern */}
-                                    <div className="absolute inset-0 flex rounded-t-3xl overflow-hidden opacity-30">
-                                        {[...Array(6)].map((_, i) => (
-                                            <div key={i} className={`flex-1 ${i % 2 === 0 ? 'bg-white' : ''}`}></div>
-                                        ))}
-                                    </div>
-                                    {/* Hanging decorations */}
-                                    <div className="absolute -bottom-3 left-8 w-3 h-6 bg-yellow-400 rounded-b-full animate-sway"></div>
-                                    <div className="absolute -bottom-3 left-20 w-3 h-6 bg-yellow-400 rounded-b-full animate-sway" style={{animationDelay: '0.2s'}}></div>
-                                    <div className="absolute -bottom-3 right-20 w-3 h-6 bg-yellow-400 rounded-b-full animate-sway" style={{animationDelay: '0.4s'}}></div>
-                                    <div className="absolute -bottom-3 right-8 w-3 h-6 bg-yellow-400 rounded-b-full animate-sway" style={{animationDelay: '0.6s'}}></div>
-                                </div>
-
-                                {/* Stall Front Panel */}
-                                <div className="relative w-80 h-64 bg-gradient-to-br from-purple-600 via-pink-600 to-red-600 rounded-2xl border-6 border-yellow-400 overflow-hidden" style={{boxShadow: '0 0 60px rgba(236,72,153,0.8), 0 0 100px rgba(147,51,234,0.6), 0 12px 0 rgba(0,0,0,0.4), inset 0 2px 20px rgba(255,255,255,0.2)'}}>
-                                    
-                                    {/* Animated background pattern */}
-                                    <div className="absolute inset-0 opacity-20">
-                                        <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: 'radial-gradient(circle, white 2px, transparent 2px)', backgroundSize: '40px 40px'}}></div>
-                                    </div>
-                                    
-                                    {/* Spotlight effects */}
-                                    <div className="absolute top-0 left-1/4 w-32 h-32 bg-yellow-300 rounded-full blur-3xl opacity-40 animate-pulse"></div>
-                                    <div className="absolute bottom-0 right-1/4 w-32 h-32 bg-cyan-300 rounded-full blur-3xl opacity-40 animate-pulse" style={{animationDelay: '1s'}}></div>
-                                    
-                                    {/* Stall Name on Panel */}
-                                    <div className="absolute top-6 left-0 right-0 flex justify-center">
-                                        <div className="bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-400 text-red-600 font-comic text-2xl font-bold px-6 py-2 rounded-full border-4 border-red-600 shadow-2xl" style={{textShadow: '2px 2px 0 rgba(0,0,0,0.3)', boxShadow: '0 0 20px rgba(255,215,0,0.8), 0 4px 0 rgba(0,0,0,0.3)'}}>
-                                            {lang === 'en' ? stall.name : stall.nameZh}
+                                {/* Colorful Awning */}
+                                <div className="absolute -top-10 -left-6 -right-6 h-14">
+                                    <div className="relative w-full h-full bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 rounded-t-3xl border-4 border-yellow-300" style={{boxShadow: '0 -5px 30px rgba(255,150,0,0.5)'}}>
+                                        {/* Stripes */}
+                                        <div className="absolute inset-0 flex rounded-t-3xl overflow-hidden">
+                                            {[...Array(8)].map((_, i) => (
+                                                <div key={i} className={`flex-1 ${i % 2 === 0 ? 'bg-white bg-opacity-20' : ''}`}></div>
+                                            ))}
+                                        </div>
+                                        {/* Fringe decoration */}
+                                        <div className="absolute bottom-0 left-0 right-0 flex justify-around">
+                                            {[...Array(12)].map((_, i) => (
+                                                <div key={i} className="w-1 h-3 bg-yellow-300 opacity-70"></div>
+                                            ))}
                                         </div>
                                     </div>
+                                </div>
+
+                                {/* Main Stall Panel - Simplified */}
+                                <div className="relative w-96 h-72 bg-gradient-to-br from-purple-700 via-pink-600 to-orange-600 rounded-3xl border-4 border-yellow-300 overflow-hidden" style={{boxShadow: '0 0 50px rgba(236,72,153,0.7), 0 15px 0 rgba(0,0,0,0.3), inset 0 2px 20px rgba(255,255,255,0.15)'}}>
                                     
                                     {/* Dice Display - Center */}
                                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -447,7 +501,7 @@ const NightMarketExplorer = ({ lang, onSelectGame, onBack }) => {
                                             <div className="absolute inset-0 -m-8 rounded-full bg-gradient-to-r from-yellow-400 via-pink-400 to-cyan-400 blur-xl opacity-60 animate-spin" style={{animationDuration: '6s'}}></div>
                                             {/* Dice */}
                                             <div className="relative text-9xl animate-bounce filter drop-shadow-2xl" style={{animationDuration: '2s'}}>
-                                                {stall.emoji}
+                                                {game.emoji}
                                             </div>
                                             {/* Sparkles around dice */}
                                             <div className="absolute -top-4 -left-4 text-3xl animate-ping" style={{animationDuration: '2s'}}>✨</div>
@@ -479,7 +533,7 @@ const NightMarketExplorer = ({ lang, onSelectGame, onBack }) => {
                             </div>
                             
                             {/* Glow effect when near */}
-                            {nearStall?.id === stall.id && (
+                            {nearGame?.id === game.id && (
                                 <>
                                     <div className="absolute inset-0 bg-yellow-300 opacity-30 rounded-2xl animate-pulse" style={{boxShadow: '0 0 60px rgba(255,255,0,0.9), 0 0 100px rgba(255,215,0,0.7)'}}></div>
                                     <div className="absolute -top-48 left-1/2 transform -translate-x-1/2 text-5xl animate-bounce">
@@ -522,15 +576,6 @@ const NightMarketExplorer = ({ lang, onSelectGame, onBack }) => {
                 </div>
             </div>
             
-            {/* Vendor Character at stall */}
-            {GAME_STALLS.map(stall => (
-                <div 
-                    key={`vendor-${stall.id}`}
-                    className="absolute bottom-72 left-1/2 transform -translate-x-1/2 text-5xl animate-sway pointer-events-none"
-                >
-                    👨‍🍳
-                </div>
-            ))}
             
             {/* Controls HUD */}
             <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 px-4 py-2 rounded-lg border-2 border-yellow-400">
@@ -540,7 +585,7 @@ const NightMarketExplorer = ({ lang, onSelectGame, onBack }) => {
             </div>
             
             {/* Interaction Prompt */}
-            {nearStall && !dialogueActive && !showInstructions && (
+            {nearGame && !dialogueActive && !showInstructions && (
                 <div className="absolute bottom-80 left-1/2 transform -translate-x-1/2 bg-yellow-400 px-4 py-1 rounded-lg border-2 border-black animate-bounce">
                     <p className="font-comic text-black text-sm">
                         {t.pressSpace}
@@ -549,7 +594,7 @@ const NightMarketExplorer = ({ lang, onSelectGame, onBack }) => {
             )}
             
             {/* Dialogue Box */}
-            {dialogueActive && currentStall && (
+            {dialogueActive && currentGame && (
                 <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-11/12 max-w-3xl bg-black bg-opacity-90 border-4 border-yellow-400 rounded-lg p-6">
                     <div className="mb-4">
                         <p className="font-comic text-yellow-400 text-xl mb-2">
@@ -577,14 +622,14 @@ const NightMarketExplorer = ({ lang, onSelectGame, onBack }) => {
             )}
             
             {/* Instructions Screen */}
-            {showInstructions && currentStall && (
+            {showInstructions && currentGame && (
                 <div className="absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
                     <div className="panel-comic p-8 max-w-2xl w-11/12 max-h-[80vh] overflow-y-auto">
                         <h2 className="font-comic text-4xl md:text-5xl text-yellow-400 mb-6 text-center">
-                            {lang === 'en' ? currentStall.name : currentStall.nameZh}
+                            {lang === 'en' ? currentGame.name : currentGame.nameZh}
                         </h2>
                         <div className="text-center text-6xl mb-6">
-                            {currentStall.emoji}
+                            {currentGame.emoji}
                         </div>
                         <h3 className="font-comic text-2xl md:text-3xl text-yellow-400 mb-4">
                             {t.howToPlay}
@@ -603,7 +648,7 @@ const NightMarketExplorer = ({ lang, onSelectGame, onBack }) => {
                             >
                                 {t.back}
                             </button>
-                            {currentStall.id === 'betgame' && (
+                            {currentGame.id === 'betgame' && (
                                 <button 
                                     onClick={startGame}
                                     className="btn-comic flex-1 py-3"
@@ -846,7 +891,118 @@ const App = () => {
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center relative p-4">
+        <div className="min-h-screen flex flex-col items-center justify-center relative p-4 overflow-hidden">
+            
+            {/* Night Market Background - Always visible */}
+            <div className="absolute inset-0 pointer-events-none">
+                {/* Night Sky */}
+                <div className="absolute inset-0 bg-gradient-to-b from-blue-900 via-indigo-900 to-purple-900"></div>
+                
+                {/* City Buildings Skyline */}
+                <div className="absolute bottom-0 left-0 right-0 h-full">
+                    {[...Array(15)].map((_, i) => {
+                        const height = 250 + Math.random() * 300;
+                        const width = 60 + Math.random() * 80;
+                        const left = i * 6.5;
+                        return (
+                            <div 
+                                key={i}
+                                className="absolute bottom-0"
+                                style={{
+                                    left: `${left}%`,
+                                    width: `${width}px`,
+                                    height: `${height}px`,
+                                }}
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-b from-indigo-800 via-blue-900 to-gray-900 border-l border-r border-blue-700 opacity-80">
+                                    {height > 450 && (
+                                        <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-1 h-8 bg-red-500">
+                                            <div className="absolute top-0 w-2 h-2 bg-red-500 rounded-full animate-pulse" style={{left: '-0.125rem'}}></div>
+                                        </div>
+                                    )}
+                                    <div className="absolute inset-0 grid grid-cols-3 gap-1 p-2">
+                                        {[...Array(Math.floor(height / 20) * 3)].map((_, w) => (
+                                            <div 
+                                                key={w} 
+                                                className={`${
+                                                    Math.random() > 0.3 ? 'bg-yellow-300' : 
+                                                    Math.random() > 0.5 ? 'bg-blue-300' : 'bg-transparent'
+                                                } opacity-70 rounded-sm`}
+                                                style={{
+                                                    boxShadow: Math.random() > 0.5 ? '0 0 8px rgba(255,255,150,0.6)' : 'none'
+                                                }}
+                                            ></div>
+                                        ))}
+                                    </div>
+                                    <div className="absolute -top-2 left-0 right-0 h-2 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700"></div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+                
+                {/* Stars */}
+                <div className="absolute inset-0">
+                    {[...Array(80)].map((_, i) => (
+                        <div 
+                            key={i}
+                            className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
+                            style={{
+                                left: `${Math.random() * 100}%`,
+                                top: `${Math.random() * 60}%`,
+                                animationDelay: `${Math.random() * 3}s`,
+                                opacity: 0.3 + Math.random() * 0.7
+                            }}
+                        />
+                    ))}
+                </div>
+                
+                {/* Moon */}
+                <div className="absolute top-20 right-32 w-24 h-24 bg-yellow-100 rounded-full" style={{boxShadow: '0 0 80px rgba(255,255,200,0.9), 0 0 120px rgba(255,255,150,0.6)'}}></div>
+                
+                {/* Falling Snow Effect */}
+                <div className="absolute inset-0">
+                    {[...Array(80)].map((_, i) => {
+                        const size = 2 + Math.random() * 4;
+                        const duration = 8 + Math.random() * 15;
+                        const delay = Math.random() * 8;
+                        const drift = (Math.random() - 0.5) * 100;
+                        return (
+                            <div
+                                key={i}
+                                className="absolute bg-white rounded-full"
+                                style={{
+                                    width: `${size}px`,
+                                    height: `${size}px`,
+                                    left: `${Math.random() * 100}%`,
+                                    top: `-20px`,
+                                    animation: `snowfall-${i} ${duration}s linear infinite`,
+                                    animationDelay: `${delay}s`,
+                                    opacity: 0.6 + Math.random() * 0.4,
+                                    boxShadow: '0 0 8px rgba(255,255,255,0.9)',
+                                    filter: 'blur(0.5px)'
+                                }}
+                            ></div>
+                        );
+                    })}
+                </div>
+            </div>
+            
+            <style>{`
+                ${[...Array(80)].map((_, i) => {
+                    const drift = (Math.random() - 0.5) * 150;
+                    return `
+                        @keyframes snowfall-${i} {
+                            0% {
+                                transform: translateY(0) translateX(0) rotate(0deg);
+                            }
+                            100% {
+                                transform: translateY(110vh) translateX(${drift}px) rotate(${360 * (Math.random() > 0.5 ? 1 : -1)}deg);
+                            }
+                        }
+                    `;
+                }).join('')}
+            `}</style>
             
             {/* --- EXPLORATION SCREEN --- */}
             {screen === 'explore' && (
@@ -859,27 +1015,16 @@ const App = () => {
             
             {/* --- MENU SCREEN --- */}
             {screen === 'menu' && (
-                <div className="flex flex-col items-center w-full max-w-md pop-in relative">
+                <div className="flex flex-col items-center w-full max-w-md pop-in relative z-10">
                     {/* Decorative Lanterns */}
                     <div className="lantern lantern-left"></div>
                     <div className="lantern lantern-right"></div>
                     {/* Decorative Burst */}
                     <div className="burst-star top-10 left-10"></div>
                     <div className="burst-star bottom-10 right-10" style={{background:'#ff3333'}}></div>
-                    {/* Night Market Toys */}
-                    <div className="toy-pic toy-1">🧸</div>
-                    <div className="toy-pic toy-2">🦆</div>
-                    <div className="toy-pic toy-3">🚗</div>
-                    <div className="toy-pic toy-4">🎈</div>
-                    <div className="toy-pic toy-5">🎪</div>
-                    <div className="toy-pic toy-6">🎯</div>
 
                     <div className="title-night-market">
-                        <div className="title-bet-header">{t.subtitle}</div>
-                        <div className="title-split-container">
-                            <div className="title-night">NIGHT</div>
-                            <div className="title-market">MARKET</div>
-                        </div>
+                        <div className="title-bet-header text-7xl font-bold text-yellow-400 mb-4" style={{textShadow: '4px 4px 0 #000, 0 0 30px rgba(255,215,0,0.8)'}}>{t.title}</div>
                     </div>
 
                     <div className="flex flex-col gap-4 w-full px-8 mt-8">
@@ -924,9 +1069,6 @@ const App = () => {
             {/* --- SETUP SCREEN --- */}
             {screen === 'setup' && (
                 <div className="panel-comic p-8 w-full max-w-md text-center pop-in relative">
-                    {/* Ambiance Elements */}
-                    <div className="setup-toy setup-toy-1">🧸</div>
-                    <div className="setup-toy setup-toy-2">🎈</div>
                     <h2 className="font-comic text-4xl mb-6 text-yellow-400" style={{textShadow:'2px 2px 0 #000'}}>{t.enterId}</h2>
                     <form onSubmit={(e) => {e.preventDefault(); startGame();}}>
                         <input 
@@ -961,8 +1103,6 @@ const App = () => {
                     {/* Game Ambiance */}
                     <div className="game-lantern game-lantern-left"></div>
                     <div className="game-lantern game-lantern-right"></div>
-                    <div className="game-toy game-toy-1">🎯</div>
-                    <div className="game-toy game-toy-2">🦆</div>
                     
                     {/* HUD */}
                     <div className="flex justify-between w-full mb-4 px-2 font-comic text-2xl md:text-3xl text-white" style={{textShadow:'2px 2px 0 #000'}}>
