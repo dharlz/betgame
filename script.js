@@ -32,6 +32,9 @@ const STRINGS = {
         selectMode: 'CHOOSE GAME MODE',
         soloMode: 'SOLO PLAY',
         aiMode: 'VS AI OPPONENT',
+        twoPlayerMode: '2 PLAYERS',
+        player1: 'PLAYER 1',
+        player2: 'PLAYER 2',
         aiName: 'LUCKY BOT',
         aiChoice: 'AI CHOICE',
         youWin: 'YOU WIN!',
@@ -75,6 +78,9 @@ const STRINGS = {
         selectMode: '選擇遊戲模式',
         soloMode: '單人遊戲',
         aiMode: '對戰AI',
+        twoPlayerMode: '雙人遊戲',
+        player1: '玩家1',
+        player2: '玩家2',
         aiName: '幸運機器人',
         aiChoice: 'AI選擇',
         youWin: '你贏了！',
@@ -310,23 +316,6 @@ const NightMarketExplorer = ({ lang, onSelectGame, onBack }) => {
                 <div className="w-full h-full opacity-20" style={{backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(0,0,0,0.3) 50px, rgba(0,0,0,0.3) 51px)'}}></div>
             </div>
             
-            {/* Background People Silhouettes (Far away) */}
-            <div className="absolute bottom-32 left-0 right-0 h-32 opacity-40">
-                {[...Array(15)].map((_, i) => (
-                    <div 
-                        key={i}
-                        className="absolute bottom-0"
-                        style={{
-                            left: `${i * 6 + Math.random() * 4}%`,
-                            animation: `float ${3 + Math.random() * 2}s ease-in-out infinite`,
-                            animationDelay: `${Math.random() * 2}s`
-                        }}
-                    >
-                        <div className="text-2xl filter blur-sm opacity-60">🚶</div>
-                    </div>
-                ))}
-            </div>
-            
             {/* Background Stalls (Other market stalls) */}
             <div className="absolute bottom-28 left-0 right-0 flex justify-around opacity-50">
                 {/* Left background stalls */}
@@ -346,32 +335,14 @@ const NightMarketExplorer = ({ lang, onSelectGame, onBack }) => {
                 </div>
             </div>
             
-            {/* Mid-ground People Walking */}
-            <div className="absolute bottom-48 left-0 right-0">
-                {[...Array(8)].map((_, i) => (
-                    <div 
-                        key={i}
-                        className="absolute bottom-0 opacity-60"
-                        style={{
-                            left: `${10 + i * 10}%`,
-                            transform: `scale(${0.7 + Math.random() * 0.3})`,
-                            animation: `sway ${2 + Math.random() * 1}s ease-in-out infinite`,
-                            animationDelay: `${Math.random() * 2}s`
-                        }}
-                    >
-                        <div className="text-4xl">{['🚶', '🚶‍♀️', '🧍', '🧍‍♀️'][Math.floor(Math.random() * 4)]}</div>
-                    </div>
-                ))}
-            </div>
-            
             {/* Market Entrance Sign */}
-            <div className="absolute top-24 left-1/2 transform -translate-x-1/2 z-10">
+            <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-10">
                 <div className="relative">
                     {/* Glow effect behind sign */}
                     <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 blur-xl opacity-60 animate-pulse"></div>
                     {/* Main sign */}
-                    <div className="relative bg-gradient-to-r from-red-600 via-orange-600 to-red-600 border-8 border-yellow-400 px-16 py-8 rounded-2xl transform hover:rotate-0 transition-transform" style={{boxShadow: '0 10px 0 rgba(0,0,0,0.4), 0 0 60px rgba(255,215,0,0.7)'}}>
-                        <div className="font-comic text-6xl text-yellow-300 font-bold text-center animate-pulse" style={{textShadow: '5px 5px 0 #000, 0 0 30px rgba(255,215,0,0.8)'}}>
+                    <div className="relative bg-gradient-to-r from-red-600 via-orange-600 to-red-600 border-6 border-yellow-400 px-8 py-3 rounded-2xl transform hover:rotate-0 transition-transform" style={{boxShadow: '0 8px 0 rgba(0,0,0,0.4), 0 0 40px rgba(255,215,0,0.7)'}}>
+                        <div className="font-comic text-3xl text-yellow-300 font-bold text-center animate-pulse" style={{textShadow: '3px 3px 0 #000, 0 0 20px rgba(255,215,0,0.8)'}}>
                             🎪 {lang === 'en' ? 'NIGHT MARKET' : '夜市'} 🎪
                         </div>
                         {/* Decorative lights on sign */}
@@ -462,6 +433,13 @@ const NightMarketExplorer = ({ lang, onSelectGame, onBack }) => {
                                     <div className="absolute top-0 left-1/4 w-32 h-32 bg-yellow-300 rounded-full blur-3xl opacity-40 animate-pulse"></div>
                                     <div className="absolute bottom-0 right-1/4 w-32 h-32 bg-cyan-300 rounded-full blur-3xl opacity-40 animate-pulse" style={{animationDelay: '1s'}}></div>
                                     
+                                    {/* Stall Name on Panel */}
+                                    <div className="absolute top-6 left-0 right-0 flex justify-center">
+                                        <div className="bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-400 text-red-600 font-comic text-2xl font-bold px-6 py-2 rounded-full border-4 border-red-600 shadow-2xl" style={{textShadow: '2px 2px 0 rgba(0,0,0,0.3)', boxShadow: '0 0 20px rgba(255,215,0,0.8), 0 4px 0 rgba(0,0,0,0.3)'}}>
+                                            {lang === 'en' ? stall.name : stall.nameZh}
+                                        </div>
+                                    </div>
+                                    
                                     {/* Dice Display - Center */}
                                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                                         <div className="relative">
@@ -520,30 +498,12 @@ const NightMarketExplorer = ({ lang, onSelectGame, onBack }) => {
                 className="absolute bottom-48 transition-all duration-200 ease-out z-10"
                 style={{ 
                     left: `${playerPos}px`, 
-                    transform: `translateX(-50%) ${facingRight ? '' : 'scaleX(-1)'}` 
+                    transform: `translateX(-50%) ${facingRight ? 'scaleX(-1)' : ''}` 
                 }}
             >
                 <div className="text-6xl drop-shadow-lg">
-                    {isWalking ? '🏃' : '🧍'}
+                    {isWalking ? '🏃‍♀️' : '🧍‍♀️'}
                 </div>
-            </div>
-            
-            {/* Foreground People (Walking in front) */}
-            <div className="absolute bottom-32 left-0 right-0 pointer-events-none">
-                {[...Array(5)].map((_, i) => (
-                    <div 
-                        key={i}
-                        className="absolute bottom-0 opacity-70"
-                        style={{
-                            left: `${5 + i * 18}%`,
-                            animation: `sway ${1.5 + Math.random() * 1}s ease-in-out infinite`,
-                            animationDelay: `${Math.random() * 1}s`,
-                            zIndex: 5
-                        }}
-                    >
-                        <div className="text-5xl filter drop-shadow-lg">{['🚶‍♂️', '🚶‍♀️', '🧍‍♂️', '🧍‍♀️', '👨‍👩‍👧'][i]}</div>
-                    </div>
-                ))}
             </div>
             
             {/* Street Lamps */}
@@ -573,16 +533,16 @@ const NightMarketExplorer = ({ lang, onSelectGame, onBack }) => {
             ))}
             
             {/* Controls HUD */}
-            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 px-6 py-3 rounded-lg border-2 border-yellow-400">
-                <p className="font-comic text-white text-center text-sm md:text-base">
+            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 px-4 py-2 rounded-lg border-2 border-yellow-400">
+                <p className="font-comic text-white text-center text-xs">
                     {t.controls}
                 </p>
             </div>
             
             {/* Interaction Prompt */}
             {nearStall && !dialogueActive && !showInstructions && (
-                <div className="absolute bottom-96 left-1/2 transform -translate-x-1/2 bg-yellow-400 px-6 py-3 rounded-lg border-4 border-black animate-bounce">
-                    <p className="font-comic text-black text-xl">
+                <div className="absolute bottom-80 left-1/2 transform -translate-x-1/2 bg-yellow-400 px-4 py-1 rounded-lg border-2 border-black animate-bounce">
+                    <p className="font-comic text-black text-sm">
                         {t.pressSpace}
                     </p>
                 </div>
@@ -684,20 +644,21 @@ const Die = ({ color, isRolling, targetColor }) => {
     let style = {};
     
     if (isRolling && targetColor) {
-        // Spinning animation - multiple full rotations then land on target
+        // Enhanced spinning animation - multiple full rotations then land on target
         const target = getAngles(targetColor);
-        // Add exactly 4 full rotations (1440deg) to the target angles for smooth landing
-        const spinX = target.x + 1440;
-        const spinY = target.y + 1440;
+        // Add exactly 6 full rotations (2160deg) to the target angles for smooth landing with z-axis
+        const spinX = target.x + 2160;
+        const spinY = target.y + 2160;
+        const spinZ = 2160; // Add Z-axis rotation for more dynamic roll
         style = {
-            transform: `rotateX(${spinX}deg) rotateY(${spinY}deg)`,
-            transition: 'transform 12s cubic-bezier(0.2, 0.8, 0.4, 1)'
+            transform: `rotateX(${spinX}deg) rotateY(${spinY}deg) rotateZ(${spinZ}deg)`,
+            transition: 'transform 3s cubic-bezier(0.2, 0.8, 0.4, 1)'
         };
     } else {
         const target = getAngles(color);
         style = {
-            transform: `rotateX(${target.x}deg) rotateY(${target.y}deg)`,
-            transition: 'transform 0.5s ease-out'
+            transform: `rotateX(${target.x}deg) rotateY(${target.y}deg) rotateZ(0deg)`,
+            transition: 'transform 1s cubic-bezier(0.34, 1.56, 0.64, 1)'
         };
     }
 
@@ -718,9 +679,11 @@ const Die = ({ color, isRolling, targetColor }) => {
 const App = () => {
     const [lang, setLang] = useState('en');
     const [screen, setScreen] = useState('menu'); // menu, explore, modeSelect, setup, game, gameover, credits, tutorial
-    const [gameMode, setGameMode] = useState('solo'); // 'solo' or 'ai'
+    const [gameMode, setGameMode] = useState('solo'); // 'solo', 'ai', or 'twoplayer'
     const [name, setName] = useState('');
+    const [player2Name, setPlayer2Name] = useState('');
     const [wins, setWins] = useState(0);
+    const [player2Wins, setPlayer2Wins] = useState(0);
     const [round, setRound] = useState(1);
     const [isBonusRound, setIsBonusRound] = useState(false);
     const [bonusWon, setBonusWon] = useState(false);
@@ -738,6 +701,10 @@ const App = () => {
     const [aiWins, setAiWins] = useState(0);
     const [aiSelectedColor, setAiSelectedColor] = useState(null);
     const [aiLastResult, setAiLastResult] = useState(null);
+    
+    // Player 2 State
+    const [player2SelectedColor, setPlayer2SelectedColor] = useState(null);
+    const [player2LastResult, setPlayer2LastResult] = useState(null);
 
     const t = STRINGS[lang];
 
@@ -759,10 +726,12 @@ const App = () => {
 
     const startGame = () => {
         if(!name.trim()) return;
+        if(gameMode === 'twoplayer' && !player2Name.trim()) return;
         setScreen('game');
         setRound(1);
         setWins(0);
         setAiWins(0);
+        setPlayer2Wins(0);
         setIsBonusRound(false);
         setBonusWon(false);
         resetRound();
@@ -774,6 +743,8 @@ const App = () => {
         setPowText(null);
         setAiSelectedColor(null);
         setAiLastResult(null);
+        setPlayer2SelectedColor(null);
+        setPlayer2LastResult(null);
         
         // AI makes its choice
         if (gameMode === 'ai') {
@@ -786,7 +757,27 @@ const App = () => {
     const rollDice = () => {
         if(!selectedColor || isRolling) return;
         
-        const result = COLORS[Math.floor(Math.random() * COLORS.length)];
+        // Use crypto API for better randomness if available, fallback to Math.random
+        let randomValue;
+        if (window.crypto && window.crypto.getRandomValues) {
+            const array = new Uint32Array(1);
+            window.crypto.getRandomValues(array);
+            randomValue = array[0] / (0xFFFFFFFF + 1);
+        } else {
+            randomValue = Math.random();
+        }
+        
+        // Player-friendly probability: 40% chance for selected color, 60% for others
+        let result;
+        if (randomValue < 0.4) {
+            // 40% chance - player wins!
+            result = selectedColor;
+        } else {
+            // 60% chance - random other color
+            const otherColors = COLORS.filter(c => c !== selectedColor);
+            result = otherColors[Math.floor((randomValue - 0.4) / 0.6 * otherColors.length)];
+        }
+        
         setTargetRoll(result);
         setIsRolling(true);
         setPowText(null);
@@ -819,7 +810,17 @@ const App = () => {
                     setAiLastResult('lose');
                 }
             }
-        }, 12000);
+            
+            // Check player 2 result if in two-player mode
+            if(gameMode === 'twoplayer' && player2SelectedColor) {
+                if(result === player2SelectedColor) {
+                    setPlayer2Wins(w => w + 1);
+                    setPlayer2LastResult('win');
+                } else {
+                    setPlayer2LastResult('lose');
+                }
+            }
+        }, 3000);
     };
 
     const nextRound = () => {
@@ -839,6 +840,7 @@ const App = () => {
     const restart = () => {
         setScreen('explore'); // Changed to return to exploration
         setName('');
+        setPlayer2Name('');
         setGameMode('solo');
         setSelectedGameId(null);
     };
@@ -910,6 +912,10 @@ const App = () => {
                             <div className="text-3xl mb-1">🤖</div>
                             {t.aiMode}
                         </button>
+                        <button onClick={() => selectMode('twoplayer')} className="btn-comic py-4" style={{background: 'linear-gradient(180deg, #ff6b81 0%, #ff3838 100%)'}}>
+                            <div className="text-3xl mb-1">👥</div>
+                            {t.twoPlayerMode}
+                        </button>
                         <button onClick={() => setScreen('explore')} className="btn-comic btn-comic-blue py-2 mt-2">{t.back}</button>
                     </div>
                 </div>
@@ -927,13 +933,23 @@ const App = () => {
                             type="text" 
                             value={name}
                             onChange={e => setName(e.target.value)}
-                            className="input-comic w-full mb-8"
-                            placeholder="PLAYER 1"
+                            className="input-comic w-full mb-4"
+                            placeholder={gameMode === 'twoplayer' ? t.player1 : "PLAYER 1"}
                             autoFocus
                         />
+                        {gameMode === 'twoplayer' && (
+                            <input 
+                                type="text" 
+                                value={player2Name}
+                                onChange={e => setPlayer2Name(e.target.value)}
+                                className="input-comic w-full mb-8"
+                                placeholder={t.player2}
+                            />
+                        )}
+                        {gameMode !== 'twoplayer' && <div className="mb-4"></div>}
                         <div className="flex gap-4">
                             <button type="button" onClick={() => setScreen('explore')} className="btn-comic btn-comic-blue flex-1 py-2">{t.back}</button>
-                            <button type="submit" disabled={!name} className="btn-comic flex-1 py-2">{t.start}</button>
+                            <button type="submit" disabled={!name || (gameMode === 'twoplayer' && !player2Name)} className="btn-comic flex-1 py-2">{t.start}</button>
                         </div>
                     </form>
                 </div>
@@ -967,6 +983,19 @@ const App = () => {
                             </div>
                         </div>
                     )}
+                    
+                    {/* Player 2 HUD (if in two-player mode) */}
+                    {gameMode === 'twoplayer' && (
+                        <div className="w-full mb-4 px-2">
+                            <div className="panel-comic px-4 py-2 flex justify-between items-center" style={{background: 'rgba(255,107,129,0.2)'}}>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-2xl">👤</span>
+                                    <span className="font-comic text-xl text-white">{player2Name}</span>
+                                </div>
+                                <div className="font-comic text-xl text-yellow-400">{t.score}: {player2Wins}</div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Bottom Display: Selected Color & Wins */}
                     <div className="flex justify-between w-full mb-4 px-4">
@@ -992,6 +1021,20 @@ const App = () => {
                                 )}
                             </div>
                         )}
+                        
+                        {/* Player 2 Choice Display (if in two-player mode) */}
+                        {gameMode === 'twoplayer' && (
+                            <div className="panel-comic px-4 py-2">
+                                <p className="font-comic text-sm text-yellow-400 mb-1">{player2Name}</p>
+                                {player2SelectedColor && (
+                                    <div className={`w-12 h-12 rounded ${COLOR_BG[player2SelectedColor]} border-4 border-white shadow-lg`}></div>
+                                )}
+                                {!player2SelectedColor && (
+                                    <div className="w-12 h-12 rounded bg-gray-600 border-4 border-white border-dashed opacity-50"></div>
+                                )}
+                            </div>
+                        )}
+                        
                         <div className="panel-comic px-4 py-2">
                             <p className="font-comic text-sm text-yellow-400 mb-1">{t.score}</p>
                             <p className="font-comic text-3xl text-white" style={{textShadow:'2px 2px 0 #000'}}>{wins}</p>
@@ -1044,20 +1087,42 @@ const App = () => {
                                     </p>
                                     <p className="font-comic text-lg text-yellow-400">💰 {lang === 'en' ? 'Pick Your Lucky Color!' : '選擇你的幸運色！'} 💰</p>
                                 </div>
-                                <div className="grid grid-cols-3 gap-4 mb-6">
-                                    {COLORS.map(c => (
-                                        <button 
-                                            key={c}
-                                            onClick={() => setSelectedColor(c)}
-                                            className={`swatch h-20 md:h-24 ${COLOR_BG[c]} ${selectedColor === c ? 'selected' : ''}`}
-                                        ></button>
-                                    ))}
+                                
+                                {/* Player 1 Selection */}
+                                <div className="mb-4">
+                                    <p className="font-comic text-xl text-white mb-2 text-center">{gameMode === 'twoplayer' ? name : ''}</p>
+                                    <div className="grid grid-cols-3 gap-4 mb-4">
+                                        {COLORS.map(c => (
+                                            <button 
+                                                key={c}
+                                                onClick={() => setSelectedColor(c)}
+                                                className={`swatch h-20 md:h-24 ${COLOR_BG[c]} ${selectedColor === c ? 'selected' : ''}`}
+                                            ></button>
+                                        ))}
+                                    </div>
                                 </div>
+                                
+                                {/* Player 2 Selection (Two-Player Mode) */}
+                                {gameMode === 'twoplayer' && (
+                                    <div className="mb-4 p-4 rounded-lg" style={{background: 'rgba(255,107,129,0.1)', border: '2px solid rgba(255,107,129,0.3)'}}>
+                                        <p className="font-comic text-xl text-white mb-2 text-center">{player2Name}</p>
+                                        <div className="grid grid-cols-3 gap-4 mb-4">
+                                            {COLORS.map(c => (
+                                                <button 
+                                                    key={c}
+                                                    onClick={() => setPlayer2SelectedColor(c)}
+                                                    className={`swatch h-20 md:h-24 ${COLOR_BG[c]} ${player2SelectedColor === c ? 'selected' : ''}`}
+                                                ></button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                
                                 <button 
                                     onClick={rollDice} 
-                                    disabled={!selectedColor}
-                                    className={`btn-comic w-full py-4 text-3xl md:text-4xl ${selectedColor ? 'animate-pulse' : 'opacity-50'}`}
-                                    style={selectedColor ? {boxShadow: '0 0 20px rgba(255,215,0,0.8), 0 8px 0 #000'} : {}}
+                                    disabled={!selectedColor || (gameMode === 'twoplayer' && !player2SelectedColor)}
+                                    className={`btn-comic w-full py-4 text-3xl md:text-4xl ${(selectedColor && (gameMode !== 'twoplayer' || player2SelectedColor)) ? 'animate-pulse' : 'opacity-50'}`}
+                                    style={(selectedColor && (gameMode !== 'twoplayer' || player2SelectedColor)) ? {boxShadow: '0 0 20px rgba(255,215,0,0.8), 0 8px 0 #000'} : {}}
                                 >
                                     🎲 {t.roll} 🎲
                                 </button>
@@ -1098,6 +1163,24 @@ const App = () => {
                         </div>
                     )}
                     
+                    {/* Two-Player Mode: Show Winner */}
+                    {gameMode === 'twoplayer' && (
+                        <div className="mb-6">
+                            {wins > player2Wins && (
+                                <div className="text-6xl mb-2">🏆</div>
+                            )}
+                            {wins < player2Wins && (
+                                <div className="text-6xl mb-2">🏆</div>
+                            )}
+                            {wins === player2Wins && (
+                                <div className="text-6xl mb-2">🤝</div>
+                            )}
+                            <p className="font-comic text-4xl md:text-5xl text-yellow-400 mb-2">
+                                {wins > player2Wins ? `${name} ${t.youWin.replace('YOU WIN', 'WINS')}` : wins < player2Wins ? `${player2Name} ${t.youWin.replace('YOU WIN', 'WINS')}` : t.draw}
+                            </p>
+                        </div>
+                    )}
+                    
                     <p className="font-comic text-3xl md:text-4xl text-white mb-8">{name}</p>
                     
                     {/* Score Comparison for AI Mode */}
@@ -1113,6 +1196,20 @@ const App = () => {
                             <div className="bg-white border-4 border-black p-6 transform -rotate-2 flex-1">
                                 <p className="font-comic text-black text-xl mb-2">🤖 {t.aiName}</p>
                                 <p className="font-comic text-5xl md:text-6xl text-black">{aiWins}</p>
+                            </div>
+                        </div>
+                    ) : gameMode === 'twoplayer' ? (
+                        <div className="flex gap-4 justify-center mb-4">
+                            <div className="bg-white border-4 border-black p-6 transform rotate-2 flex-1">
+                                <p className="font-comic text-black text-xl mb-2">{name}</p>
+                                <p className="font-comic text-5xl md:text-6xl text-black">{wins}</p>
+                            </div>
+                            <div className="flex items-center font-comic text-4xl text-yellow-400">
+                                {t.vsAI}
+                            </div>
+                            <div className="bg-white border-4 border-black p-6 transform -rotate-2 flex-1">
+                                <p className="font-comic text-black text-xl mb-2">👤 {player2Name}</p>
+                                <p className="font-comic text-5xl md:text-6xl text-black">{player2Wins}</p>
                             </div>
                         </div>
                     ) : (
@@ -1133,6 +1230,10 @@ const App = () => {
                             {gameMode === 'ai' ? (
                                 wins > aiWins ? t.perfectScore :
                                 wins === aiWins ? t.greatScore :
+                                t.tryAgain
+                            ) : gameMode === 'twoplayer' ? (
+                                wins > player2Wins ? t.perfectScore :
+                                wins === player2Wins ? t.greatScore :
                                 t.tryAgain
                             ) : (
                                 bonusWon ? t.perfectScore :
