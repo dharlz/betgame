@@ -649,15 +649,15 @@ const App = () => {
             randomValue = Math.random();
         }
         
-        // Player-friendly probability: 40% chance for selected color, 60% for others
+        // Player-friendly probability: 50% chance for selected color, 50% for others
         let result;
-        if (randomValue < 0.4) {
-            // 40% chance - player wins!
+        if (randomValue < 0.5) {
+            // 50% chance - player wins!
             result = selectedColor;
         } else {
-            // 60% chance - random other color
+            // 50% chance - random other color
             const otherColors = COLORS.filter(c => c !== selectedColor);
-            result = otherColors[Math.floor((randomValue - 0.4) / 0.6 * otherColors.length)];
+            result = otherColors[Math.floor((randomValue - 0.5) / 0.5 * otherColors.length)];
         }
         
         setTargetRoll(result);
