@@ -7,8 +7,8 @@ const STRINGS = {
         title: 'BET-0-BET',
         subtitle: 'BET-0-BET',
         play: 'ENTER GAME',
-        options: 'SETTINGS',
-        credits: 'DEVELOPERS',
+        options: 'LANGUAGE',
+        credits: 'DEVELOPER',
         tutorial: 'GAME RULES',
         exit: 'QUIT',
         back: 'RETURN',
@@ -30,7 +30,7 @@ const STRINGS = {
         goodScore: 'GOOD JOB! Practice makes perfect! 💪',
         tryAgain: 'Never give up! Every master was once a beginner! 🎯',
         selectMode: 'CHOOSE GAME MODE',
-        soloMode: 'SOLO PLAY',
+        soloMode: 'SOLO',
         aiMode: 'VS AI OPPONENT',
         twoPlayerMode: '2 PLAYERS',
         player1: 'PLAYER 1',
@@ -46,13 +46,14 @@ const STRINGS = {
         pressSpace: 'Press SPACE to interact',
         skip: 'SKIP >>',
         continue: 'CONTINUE',
-        howToPlay: 'HOW TO PLAY'
+        howToPlay: 'HOW TO PLAY',
+        changeMode: 'CHANGE MODE'
     },
     zh: {
         title: 'BET-0-BET',
         subtitle: 'BET-0-BET',
         play: '進入遊戲',
-        options: '設置',
+        options: '語言',
         credits: '開發者',
         tutorial: '遊戲規則',
         exit: '退出',
@@ -91,7 +92,8 @@ const STRINGS = {
         pressSpace: '按空格鍵互動',
         skip: '跳過 >>',
         continue: '繼續',
-        howToPlay: '如何玩'
+        howToPlay: '如何玩',
+        changeMode: '更換模式'
     }
 };
 
@@ -150,528 +152,7 @@ const GAME_DATA = [
 
 // --- COMPONENTS ---
 
-// Night Market Explorer Component
-const NightMarketExplorer = ({ lang, onSelectGame, onBack }) => {
-    const [playerPos, setPlayerPos] = useState(500); // Start in center
-    const [facingRight, setFacingRight] = useState(true);
-    const [isWalking, setIsWalking] = useState(false);
-    const [nearGame, setNearGame] = useState(null);
-    const [dialogueActive, setDialogueActive] = useState(false);
-    const [dialogueIndex, setDialogueIndex] = useState(0);
-    const [showInstructions, setShowInstructions] = useState(false);
-    const [currentGame, setCurrentGame] = useState(null);
-    
-    const t = STRINGS[lang];
-    
-    // Keyboard controls
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            if (dialogueActive || showInstructions) return;
-            
-            if (e.key === 'ArrowRight') {
-                setIsWalking(true);
-                setPlayerPos(p => Math.min(950, p + 20));
-                setFacingRight(true);
-            } else if (e.key === 'ArrowLeft') {
-                setIsWalking(true);
-                setPlayerPos(p => Math.max(50, p - 20));
-                setFacingRight(false);
-            } else if (e.key === ' ' && nearGame) {
-                e.preventDefault();
-                startInteraction(nearGame);
-            }
-        };
-        
-        const handleKeyUp = (e) => {
-            if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-                setIsWalking(false);
-            }
-        };
-        
-        window.addEventListener('keydown', handleKeyDown);
-        window.addEventListener('keyup', handleKeyUp);
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-            window.removeEventListener('keyup', handleKeyUp);
-        };
-    }, [dialogueActive, showInstructions, nearGame]);
-    
-    // Check if near any game
-    useEffect(() => {
-        const nearby = GAME_DATA.find(game => 
-            Math.abs(playerPos - game.position) < 80
-        );
-        setNearGame(nearby || null);
-    }, [playerPos]);
-    
-    const startInteraction = (game) => {
-        setCurrentGame(game);
-        setDialogueActive(true);
-        setDialogueIndex(0);
-    };
-    
-    const nextDialogue = () => {
-        const dialogues = lang === 'en' ? currentGame.dialogue : currentGame.dialogueZh;
-        if (dialogueIndex < dialogues.length - 1) {
-            setDialogueIndex(i => i + 1);
-        } else {
-            setDialogueActive(false);
-            setShowInstructions(true);
-        }
-    };
-    
-    const skipDialogue = () => {
-        setDialogueActive(false);
-        setShowInstructions(true);
-    };
-    
-    const startGame = () => {
-        if (currentGame.id === 'betgame') {
-            onSelectGame(currentGame.id);
-        } else {
-            // Game not available yet
-            setShowInstructions(false);
-            setCurrentGame(null);
-        }
-    };
-    
-    const closeInstructions = () => {
-        setShowInstructions(false);
-        setCurrentGame(null);
-    };
-    
-    const dialogues = currentGame ? (lang === 'en' ? currentGame.dialogue : currentGame.dialogueZh) : [];
-    const instructions = currentGame ? (lang === 'en' ? currentGame.instructions : currentGame.instructionsZh) : [];
-    
-    return (
-        <div className="w-full h-screen relative overflow-hidden">
-            {/* Night Sky with City Skyline */}
-            <div className="absolute inset-0 bg-gradient-to-b from-blue-900 via-indigo-900 to-purple-900"></div>
-            
-            {/* City Buildings Skyline - Enhanced */}
-            <div className="absolute bottom-0 left-0 right-0 h-full">
-                {/* Modern skyscrapers in background */}
-                {[...Array(15)].map((_, i) => {
-                    const height = 250 + Math.random() * 300;
-                    const width = 60 + Math.random() * 80;
-                    const left = i * 6.5;
-                    return (
-                        <div 
-                            key={i}
-                            className="absolute bottom-0 transition-all duration-1000"
-                            style={{
-                                left: `${left}%`,
-                                width: `${width}px`,
-                                height: `${height}px`,
-                            }}
-                        >
-                            {/* Building body with gradient */}
-                            <div className="absolute inset-0 bg-gradient-to-b from-indigo-800 via-blue-900 to-gray-900 border-l border-r border-blue-700 opacity-80">
-                                {/* Antenna on tallest buildings */}
-                                {height > 450 && (
-                                    <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-1 h-8 bg-red-500">
-                                        <div className="absolute top-0 w-2 h-2 bg-red-500 rounded-full animate-pulse" style={{left: '-0.125rem'}}></div>
-                                    </div>
-                                )}
-                                
-                                {/* Windows grid */}
-                                <div className="absolute inset-0 grid grid-cols-3 gap-1 p-2">
-                                    {[...Array(Math.floor(height / 20) * 3)].map((_, w) => (
-                                        <div 
-                                            key={w} 
-                                            className={`${
-                                                Math.random() > 0.3 ? 'bg-yellow-300' : 
-                                                Math.random() > 0.5 ? 'bg-blue-300' : 'bg-transparent'
-                                            } opacity-70 rounded-sm transition-opacity duration-1000`}
-                                            style={{
-                                                animationDelay: `${Math.random() * 5}s`,
-                                                boxShadow: Math.random() > 0.5 ? '0 0 8px rgba(255,255,150,0.6)' : 'none'
-                                            }}
-                                        ></div>
-                                    ))}
-                                </div>
-                                
-                                {/* Rooftop */}
-                                <div className="absolute -top-2 left-0 right-0 h-2 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700"></div>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-            
-            {/* Stars */}
-            <div className="absolute inset-0">
-                {[...Array(80)].map((_, i) => (
-                    <div 
-                        key={i}
-                        className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
-                        style={{
-                            left: `${Math.random() * 100}%`,
-                            top: `${Math.random() * 60}%`,
-                            animationDelay: `${Math.random() * 3}s`,
-                            opacity: 0.3 + Math.random() * 0.7
-                        }}
-                    />
-                ))}
-            </div>
-            
-            {/* Large Moon */}
-            <div className="absolute top-20 right-32 w-24 h-24 bg-yellow-100 rounded-full" style={{boxShadow: '0 0 80px rgba(255,255,200,0.9), 0 0 120px rgba(255,255,150,0.6)'}}></div>
-            
-            {/* Falling Snow Effect */}
-            <div className="absolute inset-0 pointer-events-none">
-                {[...Array(60)].map((_, i) => (
-                    <div
-                        key={i}
-                        className="absolute bg-white rounded-full"
-                        style={{
-                            width: `${2 + Math.random() * 3}px`,
-                            height: `${2 + Math.random() * 3}px`,
-                            left: `${Math.random() * 100}%`,
-                            top: `-20px`,
-                            animation: `snowfall ${8 + Math.random() * 15}s linear infinite`,
-                            animationDelay: `${Math.random() * 8}s`,
-                            opacity: 0.7 + Math.random() * 0.3,
-                            boxShadow: '0 0 5px rgba(255,255,255,0.8)'
-                        }}
-                    ></div>
-                ))}
-            </div>
-            
-            <style>{`
-                @keyframes snowfall {
-                    0% {
-                        transform: translateY(0) translateX(0) rotate(0deg);
-                        opacity: 0.8;
-                    }
-                    50% {
-                        opacity: 0.9;
-                    }
-                    100% {
-                        transform: translateY(100vh) translateX(${Math.random() * 100 - 50}px) rotate(360deg);
-                        opacity: 0;
-                    }
-                }
-            `}</style>
-            
-            {/* String Lights Across Scene */}
-            <div className="absolute top-32 left-0 right-0 h-1">
-                <svg className="w-full h-32" style={{overflow: 'visible'}}>
-                    <path d="M 0,60 Q 200,40 400,60 T 800,60 T 1200,60" stroke="rgba(0,0,0,0.3)" strokeWidth="2" fill="none"/>
-                </svg>
-                {[...Array(20)].map((_, i) => (
-                    <div 
-                        key={i}
-                        className="absolute w-3 h-4 rounded-full animate-pulse"
-                        style={{
-                            left: `${i * 5}%`,
-                            top: `${20 + Math.sin(i * 0.5) * 10}px`,
-                            backgroundColor: ['#ff4444', '#ffaa00', '#44ff44', '#4444ff', '#ff44ff'][i % 5],
-                            boxShadow: `0 0 10px ${['#ff4444', '#ffaa00', '#44ff44', '#4444ff', '#ff44ff'][i % 5]}`,
-                            animationDelay: `${i * 0.1}s`
-                        }}
-                    />
-                ))}
-            </div>
-            
-            {/* Ground */}
-            <div className="absolute bottom-0 w-full h-64 bg-gradient-to-t from-gray-800 via-gray-700 to-transparent">
-                <div className="w-full h-full opacity-20" style={{backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(0,0,0,0.3) 50px, rgba(0,0,0,0.3) 51px)'}}></div>
-            </div>
-            
-            {/* Background Stalls - More Vibrant */}
-            <div className="absolute bottom-28 left-0 right-0 flex justify-around opacity-60">
-                {/* Food Stall */}
-                <div className="relative w-36 h-24 bg-gradient-to-br from-orange-600 to-red-600 rounded-t-xl border-4 border-yellow-500 shadow-2xl" style={{boxShadow: '0 0 30px rgba(255,100,0,0.7)'}}>
-                    <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-sm font-comic text-yellow-300 font-bold" style={{textShadow: '2px 2px 0 #000'}}>🍜 FOOD 🍜</div>
-                    <div className="absolute inset-0 flex items-center justify-center text-4xl">🍲</div>
-                    <div className="absolute bottom-1 left-0 right-0 flex justify-around">
-                        {[...Array(5)].map((_, i) => (
-                            <div key={i} className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" style={{animationDelay: `${i * 0.3}s`}}></div>
-                        ))}
-                    </div>
-                </div>
-                
-                {/* Prize Stall */}
-                <div className="relative w-36 h-24 bg-gradient-to-br from-blue-600 to-purple-600 rounded-t-xl border-4 border-cyan-400 shadow-2xl" style={{boxShadow: '0 0 30px rgba(100,100,255,0.7)'}}>
-                    <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-sm font-comic text-cyan-300 font-bold" style={{textShadow: '2px 2px 0 #000'}}>🎯 PRIZES 🎯</div>
-                    <div className="absolute inset-0 flex items-center justify-center text-4xl">🎪</div>
-                    <div className="absolute bottom-1 left-0 right-0 flex justify-around">
-                        {[...Array(5)].map((_, i) => (
-                            <div key={i} className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" style={{animationDelay: `${i * 0.3}s`}}></div>
-                        ))}
-                    </div>
-                </div>
-                
-                {/* Toy Stall */}
-                <div className="relative w-36 h-24 bg-gradient-to-br from-pink-600 to-red-600 rounded-t-xl border-4 border-yellow-500 shadow-2xl" style={{boxShadow: '0 0 30px rgba(255,100,150,0.7)'}}>
-                    <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-sm font-comic text-pink-300 font-bold" style={{textShadow: '2px 2px 0 #000'}}>🧸 TOYS 🧸</div>
-                    <div className="absolute inset-0 flex items-center justify-center text-4xl">🎁</div>
-                    <div className="absolute bottom-1 left-0 right-0 flex justify-around">
-                        {[...Array(5)].map((_, i) => (
-                            <div key={i} className="w-2 h-2 rounded-full bg-pink-400 animate-pulse" style={{animationDelay: `${i * 0.3}s`}}></div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-            
-            {/* Entrance Sign */}
-            <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-10">
-                <div className="relative">
-                    {/* Glow effect behind sign */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 blur-xl opacity-60 animate-pulse"></div>
-                    {/* Main sign */}
-                    <div className="relative bg-gradient-to-r from-red-600 via-orange-600 to-red-600 border-6 border-yellow-400 px-12 py-4 rounded-2xl transform hover:rotate-0 transition-transform" style={{boxShadow: '0 8px 0 rgba(0,0,0,0.4), 0 0 40px rgba(255,215,0,0.7)'}}>
-                        <div className="font-comic text-4xl text-yellow-300 font-bold text-center animate-pulse" style={{textShadow: '3px 3px 0 #000, 0 0 20px rgba(255,215,0,0.8)'}}>
-                            🎪 BET-0-BET 🎪
-                        </div>
-                        {/* Decorative lights on sign */}
-                        <div className="absolute -top-2 left-4 right-4 flex justify-between">
-                            {[...Array(8)].map((_, i) => (
-                                <div key={i} className="w-3 h-3 rounded-full bg-yellow-300 animate-pulse" style={{animationDelay: `${i * 0.2}s`, boxShadow: '0 0 10px rgba(255,255,0,0.9)'}}></div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            {/* Main Game - BET-O-BET */}
-            <div className="absolute bottom-48 w-full h-64 flex items-end justify-center">
-                {GAME_DATA.map(game => (
-                    <div 
-                        key={game.id}
-                        className="relative transition-all duration-300"
-                    >
-                        {/* Stall Design - Clean and Attractive */}
-                        <div className="relative w-96">
-                            
-                            {/* Single Neon Sign - Clean Design */}
-                            <div className="absolute -top-28 left-1/2 transform -translate-x-1/2 w-80">
-                                <div className="relative">
-                                    {/* Neon glow background */}
-                                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 blur-xl opacity-70 animate-pulse"></div>
-                                    {/* Sign board */}
-                                    <div className="relative bg-gradient-to-br from-gray-900 to-black rounded-2xl p-6 border-4 border-yellow-400" style={{boxShadow: '0 0 30px rgba(255,215,0,0.6), inset 0 2px 10px rgba(255,255,255,0.1)'}}>
-                                        <div className="font-comic text-5xl font-bold text-center" style={{
-                                            background: 'linear-gradient(45deg, #ffd700, #ffed4e, #ffd700)',
-                                            WebkitBackgroundClip: 'text',
-                                            WebkitTextFillColor: 'transparent',
-                                            textShadow: '0 0 40px rgba(255,215,0,0.8)',
-                                            filter: 'drop-shadow(0 0 20px rgba(255,215,0,0.6))'
-                                        }}>
-                                            {lang === 'en' ? game.name : game.nameZh}
-                                        </div>
-                                        {/* Decorative lights */}
-                                        <div className="absolute -bottom-2 left-0 right-0 flex justify-around">
-                                            {[...Array(5)].map((_, i) => (
-                                                <div key={i} className="w-3 h-3 rounded-full bg-yellow-300 animate-pulse" style={{animationDelay: `${i * 0.2}s`, boxShadow: '0 0 15px rgba(255,215,0,0.9)'}}></div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            {/* Stall Structure */}
-                            <div className="relative">
-                                {/* Colorful Awning */}
-                                <div className="absolute -top-10 -left-6 -right-6 h-14">
-                                    <div className="relative w-full h-full bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 rounded-t-3xl border-4 border-yellow-300" style={{boxShadow: '0 -5px 30px rgba(255,150,0,0.5)'}}>
-                                        {/* Stripes */}
-                                        <div className="absolute inset-0 flex rounded-t-3xl overflow-hidden">
-                                            {[...Array(8)].map((_, i) => (
-                                                <div key={i} className={`flex-1 ${i % 2 === 0 ? 'bg-white bg-opacity-20' : ''}`}></div>
-                                            ))}
-                                        </div>
-                                        {/* Fringe decoration */}
-                                        <div className="absolute bottom-0 left-0 right-0 flex justify-around">
-                                            {[...Array(12)].map((_, i) => (
-                                                <div key={i} className="w-1 h-3 bg-yellow-300 opacity-70"></div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Main Stall Panel - Simplified */}
-                                <div className="relative w-96 h-72 bg-gradient-to-br from-purple-700 via-pink-600 to-orange-600 rounded-3xl border-4 border-yellow-300 overflow-hidden" style={{boxShadow: '0 0 50px rgba(236,72,153,0.7), 0 15px 0 rgba(0,0,0,0.3), inset 0 2px 20px rgba(255,255,255,0.15)'}}>
-                                    
-                                    {/* Dice Display - Center */}
-                                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                                        <div className="relative">
-                                            {/* Glow ring behind dice */}
-                                            <div className="absolute inset-0 -m-8 rounded-full bg-gradient-to-r from-yellow-400 via-pink-400 to-cyan-400 blur-xl opacity-60 animate-spin" style={{animationDuration: '6s'}}></div>
-                                            {/* Dice */}
-                                            <div className="relative text-9xl animate-bounce filter drop-shadow-2xl" style={{animationDuration: '2s'}}>
-                                                {game.emoji}
-                                            </div>
-                                            {/* Sparkles around dice */}
-                                            <div className="absolute -top-4 -left-4 text-3xl animate-ping" style={{animationDuration: '2s'}}>✨</div>
-                                            <div className="absolute -top-4 -right-4 text-3xl animate-ping" style={{animationDuration: '2s', animationDelay: '0.5s'}}>✨</div>
-                                            <div className="absolute -bottom-4 -left-4 text-3xl animate-ping" style={{animationDuration: '2s', animationDelay: '1s'}}>✨</div>
-                                            <div className="absolute -bottom-4 -right-4 text-3xl animate-ping" style={{animationDuration: '2s', animationDelay: '1.5s'}}>✨</div>
-                                        </div>
-                                    </div>
-                                    
-                                    {/* Decorative corners */}
-                                    <div className="absolute top-2 left-2 text-2xl">⭐</div>
-                                    <div className="absolute top-2 right-2 text-2xl">⭐</div>
-                                    <div className="absolute bottom-14 left-2 text-2xl">⭐</div>
-                                    <div className="absolute bottom-14 right-2 text-2xl">⭐</div>
-                                    
-                                    {/* Counter/Table at bottom */}
-                                    <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-b from-amber-600 to-amber-900 border-t-4 border-yellow-500">
-                                        <div className="flex justify-center items-center h-full gap-3 text-2xl">
-                                            <span className="animate-bounce" style={{animationDelay: '0s'}}>🎰</span>
-                                            <span className="animate-bounce" style={{animationDelay: '0.2s'}}>🎲</span>
-                                            <span className="animate-bounce" style={{animationDelay: '0.4s'}}>🎯</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Wooden Support Poles */}
-                                <div className="absolute -left-2 top-0 bottom-0 w-4 bg-gradient-to-b from-amber-700 to-amber-900 border-2 border-amber-950 rounded-full" style={{boxShadow: '2px 0 8px rgba(0,0,0,0.5)'}}></div>
-                                <div className="absolute -right-2 top-0 bottom-0 w-4 bg-gradient-to-b from-amber-700 to-amber-900 border-2 border-amber-950 rounded-full" style={{boxShadow: '-2px 0 8px rgba(0,0,0,0.5)'}}></div>
-                            </div>
-                            
-                            {/* Glow effect when near */}
-                            {nearGame?.id === game.id && (
-                                <>
-                                    <div className="absolute inset-0 bg-yellow-300 opacity-30 rounded-2xl animate-pulse" style={{boxShadow: '0 0 60px rgba(255,255,0,0.9), 0 0 100px rgba(255,215,0,0.7)'}}></div>
-                                    <div className="absolute -top-48 left-1/2 transform -translate-x-1/2 text-5xl animate-bounce">
-                                        <div className="font-comic text-yellow-300 text-3xl mb-2" style={{textShadow: '2px 2px 0 #000'}}>PRESS SPACE!</div>
-                                        <div className="text-center">👇</div>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                ))}
-            </div>
-            
-            {/* Player Character */}
-            <div 
-                className="absolute bottom-48 transition-all duration-200 ease-out z-10"
-                style={{ 
-                    left: `${playerPos}px`, 
-                    transform: `translateX(-50%) ${facingRight ? 'scaleX(-1)' : ''}` 
-                }}
-            >
-                <div className="text-6xl drop-shadow-lg">
-                    {isWalking ? '🏃‍♀️' : '🧍‍♀️'}
-                </div>
-            </div>
-            
-            {/* Street Lamps */}
-            <div className="absolute bottom-48 left-20">
-                <div className="relative">
-                    <div className="w-2 h-32 bg-gray-700 mx-auto"></div>
-                    <div className="w-8 h-8 bg-yellow-300 rounded-full mx-auto -mt-1" style={{boxShadow: '0 0 40px rgba(255,255,150,0.9)'}}></div>
-                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-32 h-32 bg-yellow-200 rounded-full blur-2xl opacity-30"></div>
-                </div>
-            </div>
-            <div className="absolute bottom-48 right-20">
-                <div className="relative">
-                    <div className="w-2 h-32 bg-gray-700 mx-auto"></div>
-                    <div className="w-8 h-8 bg-yellow-300 rounded-full mx-auto -mt-1" style={{boxShadow: '0 0 40px rgba(255,255,150,0.9)'}}></div>
-                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-32 h-32 bg-yellow-200 rounded-full blur-2xl opacity-30"></div>
-                </div>
-            </div>
-            
-            
-            {/* Controls HUD */}
-            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 px-4 py-2 rounded-lg border-2 border-yellow-400">
-                <p className="font-comic text-white text-center text-xs">
-                    {t.controls}
-                </p>
-            </div>
-            
-            {/* Interaction Prompt */}
-            {nearGame && !dialogueActive && !showInstructions && (
-                <div className="absolute bottom-80 left-1/2 transform -translate-x-1/2 bg-yellow-400 px-4 py-1 rounded-lg border-2 border-black animate-bounce">
-                    <p className="font-comic text-black text-sm">
-                        {t.pressSpace}
-                    </p>
-                </div>
-            )}
-            
-            {/* Dialogue Box */}
-            {dialogueActive && currentGame && (
-                <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-11/12 max-w-3xl bg-black bg-opacity-90 border-4 border-yellow-400 rounded-lg p-6">
-                    <div className="mb-4">
-                        <p className="font-comic text-yellow-400 text-xl mb-2">
-                            {dialogues[dialogueIndex].speaker}
-                        </p>
-                        <p className="font-comic text-white text-2xl">
-                            {dialogues[dialogueIndex].text}
-                        </p>
-                    </div>
-                    <div className="flex gap-4 justify-end">
-                        <button 
-                            onClick={skipDialogue}
-                            className="btn-comic btn-comic-blue px-6 py-2"
-                        >
-                            {t.skip}
-                        </button>
-                        <button 
-                            onClick={nextDialogue}
-                            className="btn-comic px-6 py-2"
-                        >
-                            {dialogueIndex < dialogues.length - 1 ? t.continue : t.howToPlay}
-                        </button>
-                    </div>
-                </div>
-            )}
-            
-            {/* Instructions Screen */}
-            {showInstructions && currentGame && (
-                <div className="absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-                    <div className="panel-comic p-8 max-w-2xl w-11/12 max-h-[80vh] overflow-y-auto">
-                        <h2 className="font-comic text-4xl md:text-5xl text-yellow-400 mb-6 text-center">
-                            {lang === 'en' ? currentGame.name : currentGame.nameZh}
-                        </h2>
-                        <div className="text-center text-6xl mb-6">
-                            {currentGame.emoji}
-                        </div>
-                        <h3 className="font-comic text-2xl md:text-3xl text-yellow-400 mb-4">
-                            {t.howToPlay}
-                        </h3>
-                        <div className="bg-white bg-opacity-10 rounded-lg p-6 mb-6">
-                            {instructions.map((instruction, i) => (
-                                <p key={i} className="font-comic text-white text-lg md:text-xl mb-3">
-                                    {instruction}
-                                </p>
-                            ))}
-                        </div>
-                        <div className="flex gap-4">
-                            <button 
-                                onClick={closeInstructions}
-                                className="btn-comic btn-comic-blue flex-1 py-3"
-                            >
-                                {t.back}
-                            </button>
-                            {currentGame.id === 'betgame' && (
-                                <button 
-                                    onClick={startGame}
-                                    className="btn-comic flex-1 py-3"
-                                >
-                                    {t.start}
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
-            
-            {/* Back Button */}
-            <button 
-                onClick={onBack}
-                className="absolute top-4 left-4 btn-comic btn-comic-blue px-6 py-2"
-            >
-                {t.back}
-            </button>
-        </div>
-    );
-};
-
+// Die Component
 const Die = ({ color, isRolling, targetColor }) => {
     // Angles to show specific face
     const getAngles = (c) => {
@@ -723,7 +204,7 @@ const Die = ({ color, isRolling, targetColor }) => {
 
 const App = () => {
     const [lang, setLang] = useState('en');
-    const [screen, setScreen] = useState('menu'); // menu, explore, modeSelect, setup, game, gameover, credits, tutorial
+    const [screen, setScreen] = useState('menu'); // menu, tutorial, modeSelect, setup, game, gameover, credits
     const [gameMode, setGameMode] = useState('solo'); // 'solo', 'ai', or 'twoplayer'
     const [name, setName] = useState('');
     const [player2Name, setPlayer2Name] = useState('');
@@ -750,23 +231,56 @@ const App = () => {
     // Player 2 State
     const [player2SelectedColor, setPlayer2SelectedColor] = useState(null);
     const [player2LastResult, setPlayer2LastResult] = useState(null);
+    const [isMusicPlaying, setIsMusicPlaying] = useState(false);
 
     const t = STRINGS[lang];
 
-    const handleStart = () => {
-        setScreen('explore'); // Changed to go to exploration first
+    // Sound effects and music
+    const playDiceSound = () => {
+        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZRQ0PVantx49UEAhDmty0pWQcBjSJ1PTNfS4FKHzL8N2RQQwUYLft6KdWFApIouHyvnAhBTKJ0vTUhzQGH2/A8OScRw0PVqvuyJNWEAlEnN60pWYdBzOJ1vXOgC4FKX7M8N+SSAMUYrju6apaFgpJpOL0wHIjBjOL0/XXijYHIG/C8eWhSg4PWKzwyZRYEQpGnuC1p2kdCDSL1/XPgy4FKoHN8eGUSwMVY7nv6q1bFwpLpuP0wnQkBzSM1PbYjDcHIXHD8uekTA8QWq7xypdaEwpIoOG2qGoeCD');
+        audio.volume = 0.3;
+        audio.play().catch(() => {});
     };
-    
-    const handleGameSelected = (gameId) => {
-        setSelectedGameId(gameId);
-        if (gameId === 'betgame') {
-            setScreen('modeSelect');
-        }
+
+    // Keyboard controls for Player 2 (Two-player mode)
+    useEffect(() => {
+        if (gameMode !== 'twoplayer' || screen !== 'game' || isRolling || lastResult !== null) return;
+
+        const handleKeyPress = (e) => {
+            const keyMap = {
+                '1': 'red',
+                '2': 'blue',
+                '3': 'green',
+                '4': 'yellow',
+                '5': 'white',
+                '6': 'pink'
+            };
+            
+            if (keyMap[e.key]) {
+                setPlayer2SelectedColor(keyMap[e.key]);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyPress);
+        return () => window.removeEventListener('keydown', handleKeyPress);
+    }, [gameMode, screen, isRolling, lastResult]);
+
+    // Background music toggle
+    const toggleMusic = () => {
+        setIsMusicPlaying(!isMusicPlaying);
+    };
+
+    const handleStart = () => {
+        setScreen('whatIsGame'); // Show "What is this game?" explanation first
     };
     
     const selectMode = (mode) => {
         setGameMode(mode);
-        setScreen('setup');
+        if (mode === 'twoplayer') {
+            setScreen('twoPlayerTutorial');
+        } else {
+            setScreen('setup');
+        }
     };
 
     const startGame = () => {
@@ -826,6 +340,7 @@ const App = () => {
         setTargetRoll(result);
         setIsRolling(true);
         setPowText(null);
+        playDiceSound();
 
         setTimeout(() => {
             setIsRolling(false);
@@ -883,11 +398,10 @@ const App = () => {
     };
 
     const restart = () => {
-        setScreen('explore'); // Changed to return to exploration
+        setScreen('menu'); // Return to menu
         setName('');
         setPlayer2Name('');
         setGameMode('solo');
-        setSelectedGameId(null);
     };
 
     return (
@@ -963,7 +477,7 @@ const App = () => {
                 {/* Falling Snow Effect */}
                 <div className="absolute inset-0">
                     {[...Array(80)].map((_, i) => {
-                        const size = 2 + Math.random() * 4;
+                        const size = 4 + Math.random() * 8;
                         const duration = 8 + Math.random() * 15;
                         const delay = Math.random() * 8;
                         const drift = (Math.random() - 0.5) * 100;
@@ -1004,13 +518,45 @@ const App = () => {
                 }).join('')}
             `}</style>
             
-            {/* --- EXPLORATION SCREEN --- */}
-            {screen === 'explore' && (
-                <NightMarketExplorer 
-                    lang={lang}
-                    onSelectGame={handleGameSelected}
-                    onBack={() => setScreen('menu')}
-                />
+            {/* --- WHAT IS THIS GAME SCREEN (SHOWN FIRST) --- */}
+            {screen === 'whatIsGame' && (
+                <>
+                    {/* Corner Navigation Buttons */}
+                    <button onClick={() => setScreen('menu')} className="btn-comic btn-comic-blue py-2 px-4 fixed top-4 right-4 z-20" style={{fontSize: '1rem'}}>
+                        🏠 HOME
+                    </button>
+                    
+                    <div className="panel-comic p-8 w-full max-w-2xl text-left pop-in overflow-y-auto max-h-[80vh] relative z-10">
+                    <h2 className="font-comic text-4xl md:text-5xl mb-6 text-yellow-400 text-center" style={{textShadow:'2px 2px 0 #000'}}>
+                        {lang === 'en' ? 'WHAT IS THIS GAME?' : '這是什麼遊戲？'}
+                    </h2>
+                    
+                    <div className="font-comic text-white space-y-6">
+                        {lang === 'en' ? (
+                            <div>
+                                <p className="text-lg md:text-xl leading-relaxed mb-4">
+                                    The BET-0-BET Game is a digital version of the most popular game of chance found in Filipino town carnivals (known as Perya). 
+                                    It is purely a game of luck where players choose a specific color, hoping that color appears when the dice are rolled.
+                                </p>
+                                <p className="text-lg md:text-xl leading-relaxed">
+                                    We have reimagined the classic carnival experience with a dazzling Night Market style. Whether you are chasing nostalgia or just testing your destiny, this game brings the festive spirit of the fiesta straight to your pocket!
+                                </p>
+                            </div>
+                        ) : (
+                            <div>
+                                <p className="text-lg md:text-xl leading-relaxed">
+                                    BET-0-BET遊戲是菲律賓鎮上嘉年華（稱為Perya）中最受歡迎的機會遊戲的數字版本。
+                                    這純粹是一個運氣遊戲，玩家選擇特定顏色，希望擲骰子時出現該顏色。
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                    
+                    <button onClick={() => setScreen('tutorial')} className="btn-comic btn-comic-blue py-3 w-full mt-6">
+                        {t.continue}
+                    </button>
+                </div>
+                </>
             )}
             
             {/* --- MENU SCREEN --- */}
@@ -1024,7 +570,7 @@ const App = () => {
                     <div className="burst-star bottom-10 right-10" style={{background:'#ff3333'}}></div>
 
                     <div className="title-night-market">
-                        <div className="title-bet-header text-7xl font-bold text-yellow-400 mb-4" style={{textShadow: '4px 4px 0 #000, 0 0 30px rgba(255,215,0,0.8)'}}>{t.title}</div>
+                        <div className="title-bet-header">{t.title}</div>
                     </div>
 
                     <div className="flex flex-col gap-4 w-full px-8 mt-8">
@@ -1037,38 +583,141 @@ const App = () => {
                         <button onClick={() => setScreen('credits')} className="btn-comic btn-comic-blue py-3">
                             {t.credits}
                         </button>
-                        <button onClick={() => setScreen('tutorial')} className="btn-comic btn-comic-blue py-3">
-                            {t.tutorial}
-                        </button>
                     </div>
+                    <p className="text-center text-white text-sm mt-6" style={{fontFamily: 'Georgia, serif'}}>奎妲兒-DHARLS IBONALO QUINTO</p>
                 </div>
             )}
 
             {/* --- MODE SELECTION SCREEN --- */}
             {screen === 'modeSelect' && (
-                <div className="panel-comic p-8 w-full max-w-md text-center pop-in relative">
-                    <h2 className="font-comic text-4xl mb-6 text-yellow-400" style={{textShadow:'2px 2px 0 #000'}}>{t.selectMode}</h2>
-                    <div className="flex flex-col gap-4">
-                        <button onClick={() => selectMode('solo')} className="btn-comic py-4">
-                            <div className="text-3xl mb-1">🎯</div>
-                            {t.soloMode}
-                        </button>
-                        <button onClick={() => selectMode('ai')} className="btn-comic btn-comic-blue py-4">
-                            <div className="text-3xl mb-1">🤖</div>
-                            {t.aiMode}
-                        </button>
-                        <button onClick={() => selectMode('twoplayer')} className="btn-comic py-4" style={{background: 'linear-gradient(180deg, #ff6b81 0%, #ff3838 100%)'}}>
-                            <div className="text-3xl mb-1">👥</div>
-                            {t.twoPlayerMode}
-                        </button>
-                        <button onClick={() => setScreen('explore')} className="btn-comic btn-comic-blue py-2 mt-2">{t.back}</button>
+                <>
+                    {/* Corner Navigation Buttons */}
+                    <button onClick={() => setScreen('tutorial')} className="btn-comic btn-comic-blue py-2 px-4 fixed top-4 left-4 z-20" style={{fontSize: '1rem'}}>
+                        ← {t.back}
+                    </button>
+                    <button onClick={() => setScreen('menu')} className="btn-comic btn-comic-blue py-2 px-4 fixed top-4 right-4 z-20" style={{fontSize: '1rem'}}>
+                        🏠 HOME
+                    </button>
+                    
+                    <div className="panel-comic p-8 w-full max-w-md text-center pop-in relative">
+                        <h2 className="font-comic text-4xl mb-6 text-yellow-400" style={{textShadow:'2px 2px 0 #000'}}>{t.selectMode}</h2>
+                        <div className="flex flex-col gap-4">
+                            <button onClick={() => selectMode('solo')} className="btn-comic py-4">
+                                <div className="text-3xl mb-1">🎯</div>
+                                {t.soloMode}
+                            </button>
+                            <button onClick={() => selectMode('ai')} className="btn-comic btn-comic-blue py-4">
+                                <div className="text-3xl mb-1">🤖</div>
+                                {t.aiMode}
+                            </button>
+                            <button onClick={() => selectMode('twoplayer')} className="btn-comic py-4">
+                                <div className="text-3xl mb-1">👥</div>
+                                {t.twoPlayerMode}
+                            </button>
+                        </div>
                     </div>
+                </>
+            )}
+
+            {/* --- TWO PLAYER TUTORIAL SCREEN --- */}
+            {screen === 'twoPlayerTutorial' && (
+                <>
+                    {/* Corner Navigation Buttons */}
+                    <button onClick={() => setScreen('modeSelect')} className="btn-comic btn-comic-blue py-2 px-4 fixed top-4 left-4 z-20" style={{fontSize: '1rem'}}>
+                        ← {t.back}
+                    </button>
+                    <button onClick={() => setScreen('menu')} className="btn-comic btn-comic-blue py-2 px-4 fixed top-4 right-4 z-20" style={{fontSize: '1rem'}}>
+                        🏠 HOME
+                    </button>
+                    
+                    <div className="panel-comic p-8 w-full max-w-2xl text-left pop-in overflow-y-auto max-h-[80vh] relative z-10">
+                    <h2 className="font-comic text-4xl md:text-5xl mb-6 text-yellow-400 text-center" style={{textShadow:'2px 2px 0 #000'}}>
+                        {lang === 'en' ? '2 PLAYER CONTROLS' : '雙人遊戲控制'}
+                    </h2>
+                    
+                    <div className="font-comic text-white space-y-6">
+                        {lang === 'en' ? (
+                            <>
+                                <div className="bg-gradient-to-r from-blue-500 to-blue-700 p-4 rounded-lg">
+                                    <h3 className="text-2xl md:text-3xl text-yellow-400 mb-3">🖱️ PLAYER 1 - MOUSE CONTROLS</h3>
+                                    <p className="text-lg md:text-xl leading-relaxed">
+                                        Player 1 uses the <strong>MOUSE</strong> to click and select colors from the color grid.
+                                    </p>
+                                </div>
+                                
+                                <div className="bg-gradient-to-r from-pink-500 to-pink-700 p-4 rounded-lg">
+                                    <h3 className="text-2xl md:text-3xl text-yellow-400 mb-3">⌨️ PLAYER 2 - KEYBOARD CONTROLS</h3>
+                                    <p className="text-lg md:text-xl leading-relaxed mb-3">
+                                        Player 2 uses the <strong>KEYBOARD NUMBER KEYS</strong> to select colors:
+                                    </p>
+                                    <ul className="text-lg md:text-xl leading-relaxed space-y-2">
+                                        <li><strong className="text-red-300">1</strong> = 🔴 RED</li>
+                                        <li><strong className="text-blue-300">2</strong> = 🔵 BLUE</li>
+                                        <li><strong className="text-green-300">3</strong> = 🟢 GREEN</li>
+                                        <li><strong className="text-yellow-300">4</strong> = 🟡 YELLOW</li>
+                                        <li><strong className="text-gray-300">5</strong> = ⚪ WHITE</li>
+                                        <li><strong className="text-pink-300">6</strong> = 🟣 PINK</li>
+                                    </ul>
+                                </div>
+
+                                <div className="text-center bg-yellow-400 bg-opacity-20 p-4 rounded-lg">
+                                    <p className="text-xl md:text-2xl text-yellow-400 font-bold">
+                                        🎮 Both players select at the same time, then roll the dice! 🎲
+                                    </p>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="bg-gradient-to-r from-blue-500 to-blue-700 p-4 rounded-lg">
+                                    <h3 className="text-2xl md:text-3xl text-yellow-400 mb-3">🖱️ 玩家1 - 滑鼠控制</h3>
+                                    <p className="text-lg md:text-xl leading-relaxed">
+                                        玩家1使用<strong>滑鼠</strong>點擊選擇顏色。
+                                    </p>
+                                </div>
+                                
+                                <div className="bg-gradient-to-r from-pink-500 to-pink-700 p-4 rounded-lg">
+                                    <h3 className="text-2xl md:text-3xl text-yellow-400 mb-3">⌨️ 玩家2 - 鍵盤控制</h3>
+                                    <p className="text-lg md:text-xl leading-relaxed mb-3">
+                                        玩家2使用<strong>鍵盤數字鍵</strong>選擇顏色：
+                                    </p>
+                                    <ul className="text-lg md:text-xl leading-relaxed space-y-2">
+                                        <li><strong className="text-red-300">1</strong> = 🔴 紅色</li>
+                                        <li><strong className="text-blue-300">2</strong> = 🔵 藍色</li>
+                                        <li><strong className="text-green-300">3</strong> = 🟢 綠色</li>
+                                        <li><strong className="text-yellow-300">4</strong> = 🟡 黃色</li>
+                                        <li><strong className="text-gray-300">5</strong> = ⚪ 白色</li>
+                                        <li><strong className="text-pink-300">6</strong> = 🟣 粉色</li>
+                                    </ul>
+                                </div>
+
+                                <div className="text-center bg-yellow-400 bg-opacity-20 p-4 rounded-lg">
+                                    <p className="text-xl md:text-2xl text-yellow-400 font-bold">
+                                        🎮 兩位玩家同時選擇，然後擲骰子！🎲
+                                    </p>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                    
+                    <button onClick={() => setScreen('setup')} className="btn-comic btn-comic-blue py-3 w-full mt-6">
+                        {t.continue}
+                    </button>
                 </div>
+                </>
             )}
 
             {/* --- SETUP SCREEN --- */}
             {screen === 'setup' && (
-                <div className="panel-comic p-8 w-full max-w-md text-center pop-in relative">
+                <>
+                    {/* Corner Navigation Buttons */}
+                    <button onClick={() => setScreen(gameMode === 'twoplayer' ? 'twoPlayerTutorial' : 'modeSelect')} className="btn-comic btn-comic-blue py-2 px-4 fixed top-4 left-4 z-20" style={{fontSize: '1rem'}}>
+                        ← {t.back}
+                    </button>
+                    <button onClick={() => setScreen('menu')} className="btn-comic btn-comic-blue py-2 px-4 fixed top-4 right-4 z-20" style={{fontSize: '1rem'}}>
+                        🏠 HOME
+                    </button>
+                    
+                    <div className="panel-comic p-8 w-full max-w-md text-center pop-in relative">
                     <h2 className="font-comic text-4xl mb-6 text-yellow-400" style={{textShadow:'2px 2px 0 #000'}}>{t.enterId}</h2>
                     <form onSubmit={(e) => {e.preventDefault(); startGame();}}>
                         <input 
@@ -1089,12 +738,10 @@ const App = () => {
                             />
                         )}
                         {gameMode !== 'twoplayer' && <div className="mb-4"></div>}
-                        <div className="flex gap-4">
-                            <button type="button" onClick={() => setScreen('explore')} className="btn-comic btn-comic-blue flex-1 py-2">{t.back}</button>
-                            <button type="submit" disabled={!name || (gameMode === 'twoplayer' && !player2Name)} className="btn-comic flex-1 py-2">{t.start}</button>
-                        </div>
+                        <button type="submit" disabled={!name || (gameMode === 'twoplayer' && !player2Name)} className="btn-comic w-full py-3">{t.start}</button>
                     </form>
                 </div>
+                </>
             )}
 
             {/* --- GAME SCREEN --- */}
@@ -1388,8 +1035,8 @@ const App = () => {
                     <button onClick={restart} className="btn-comic w-full py-3">
                         {t.playAgain}
                     </button>
-                    <button onClick={() => setScreen('explore')} className="btn-comic btn-comic-blue w-full py-3 mt-4">
-                        {t.explore}
+                    <button onClick={() => setScreen('modeSelect')} className="btn-comic btn-comic-blue w-full py-3 mt-4">
+                        {t.changeMode}
                     </button>
                     <button onClick={() => setScreen('menu')} className="btn-comic btn-comic-blue w-full py-3 mt-2">
                         {t.exit}
@@ -1399,38 +1046,42 @@ const App = () => {
 
             {/* --- CREDITS SCREEN --- */}
             {screen === 'credits' && (
-                <div className="panel-comic p-8 w-full max-w-md text-center pop-in">
+                <>
+                    {/* Corner Navigation Buttons */}
+                    <button onClick={() => setScreen('menu')} className="btn-comic btn-comic-blue py-2 px-4 fixed top-4 left-4 z-20" style={{fontSize: '1rem'}}>
+                        ← {t.back}
+                    </button>
+                    
+                    <div className="panel-comic p-8 w-full max-w-md text-center pop-in">
                     <h2 className="font-comic text-4xl md:text-5xl mb-6 text-yellow-400" style={{textShadow:'2px 2px 0 #000'}}>{t.credits}</h2>
-                    <p className="font-comic text-2xl md:text-3xl text-white mb-4">奎妲兒/dharls</p>
-                    <p className="font-comic text-xl md:text-2xl text-white mb-6">樹德科技大學 資訊工程系</p>
-                    <button onClick={() => setScreen('menu')} className="btn-comic btn-comic-blue py-3">{t.back}</button>
+                    <p className="font-comic text-2xl md:text-3xl text-white mb-2">奎妲兒</p>
+                    <p className="font-comic text-xl md:text-2xl text-white mb-2">資訊工程系</p>
+                    <p className="font-comic text-xl md:text-2xl text-white mb-6">樹德科技大學</p>
                 </div>
+                </>
             )}
 
-            {/* --- TUTORIAL SCREEN --- */}
+            {/* --- TUTORIAL SCREEN (WELCOME & RULES) --- */}
             {screen === 'tutorial' && (
-                <div className="panel-comic p-8 w-full max-w-2xl text-left pop-in overflow-y-auto max-h-[80vh]">
+                <>
+                    {/* Corner Navigation Buttons */}
+                    <button onClick={() => setScreen('whatIsGame')} className="btn-comic btn-comic-blue py-2 px-4 fixed top-4 left-4 z-20" style={{fontSize: '1rem'}}>
+                        ← {t.back}
+                    </button>
+                    <button onClick={() => setScreen('menu')} className="btn-comic btn-comic-blue py-2 px-4 fixed top-4 right-4 z-20" style={{fontSize: '1rem'}}>
+                        🏠 HOME
+                    </button>
+                    
+                    <div className="panel-comic p-8 w-full max-w-2xl text-left pop-in overflow-y-auto max-h-[80vh]">
                     <h2 className="font-comic text-4xl md:text-5xl mb-6 text-yellow-400 text-center" style={{textShadow:'2px 2px 0 #000'}}>
-                        {lang === 'en' ? 'WHAT IS THIS GAME?' : '這是什麼遊戲？'}
+                        {lang === 'en' ? 'WELCOME TO BET-0-BET!' : '歡迎來到BET-0-BET！'}
                     </h2>
                     
                     <div className="font-comic text-white space-y-6">
                         {lang === 'en' ? (
                             <>
                                 <div>
-                                    <h3 className="text-2xl md:text-3xl text-yellow-400 mb-3">Welcome to BET-0-BET!</h3>
-                                </div>
-                                
-                                <div>
-                                    <h4 className="text-xl md:text-2xl text-yellow-400 mb-2">1. What is the BET-0-BET Game?</h4>
-                                    <p className="text-lg md:text-xl leading-relaxed">
-                                        The BET-0-BET Game is a digital version of the most popular game of chance found in Filipino town carnivals (known as Perya). 
-                                        It is purely a game of luck where players choose a specific color, hoping that color appears when the dice are rolled.
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <h4 className="text-xl md:text-2xl text-yellow-400 mb-2">2. How to Play:</h4>
+                                    <h4 className="text-xl md:text-2xl text-yellow-400 mb-2">1. How to Play:</h4>
                                     <ul className="text-lg md:text-xl leading-relaxed space-y-2 list-disc list-inside">
                                         <li><strong>Choose a Color:</strong> Simply click on one of the 6 colors on the board (Red, Blue, Yellow, Green, White, or Pink).</li>
                                         <li><strong>Watch the Roll:</strong> The system will roll 1 die.</li>
@@ -1444,7 +1095,7 @@ const App = () => {
                                 </div>
 
                                 <div>
-                                    <h4 className="text-xl md:text-2xl text-yellow-400 mb-2">3. The "Survival" Rule (Chances):</h4>
+                                    <h4 className="text-xl md:text-2xl text-yellow-400 mb-2">2. The "Survival" Rule (Chances):</h4>
                                     <p className="text-lg md:text-xl leading-relaxed mb-2">
                                         To keep the game exciting, you have a limit on how long you can play!
                                     </p>
@@ -1464,19 +1115,7 @@ const App = () => {
                         ) : (
                             <>
                                 <div>
-                                    <h3 className="text-2xl md:text-3xl text-yellow-400 mb-3">歡迎來到BET-0-BET！</h3>
-                                </div>
-                                
-                                <div>
-                                    <h4 className="text-xl md:text-2xl text-yellow-400 mb-2">1. 什麼是BET-0-BET遊戲？</h4>
-                                    <p className="text-lg md:text-xl leading-relaxed">
-                                        BET-0-BET遊戲是菲律賓鎮上嘉年華（稱為Perya）中最受歡迎的機會遊戲的數字版本。
-                                        這純粹是一個運氣遊戲，玩家選擇一個特定的顏色，希望在擲骰子時出現該顏色。
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <h4 className="text-xl md:text-2xl text-yellow-400 mb-2">2. 如何玩：</h4>
+                                    <h4 className="text-xl md:text-2xl text-yellow-400 mb-2">1. 如何玩：</h4>
                                     <ul className="text-lg md:text-xl leading-relaxed space-y-2 list-disc list-inside">
                                         <li><strong>選擇顏色：</strong> 只需點擊板上的6種顏色之一（紅色、藍色、黃色、綠色、白色或粉紅色）。</li>
                                         <li><strong>觀看擲骰：</strong> 系統將擲1個骰子。</li>
@@ -1490,7 +1129,7 @@ const App = () => {
                                 </div>
 
                                 <div>
-                                    <h4 className="text-xl md:text-2xl text-yellow-400 mb-2">3. "生存"規則（機會）：</h4>
+                                    <h4 className="text-xl md:text-2xl text-yellow-400 mb-2">2. "生存"規則（機會）：</h4>
                                     <p className="text-lg md:text-xl leading-relaxed mb-2">
                                         為了保持遊戲的刺激性，您可以玩的時間有限！
                                     </p>
@@ -1510,8 +1149,9 @@ const App = () => {
                         )}
                     </div>
                     
-                    <button onClick={() => setScreen('menu')} className="btn-comic btn-comic-blue py-3 w-full mt-6">{t.back}</button>
+                    <button onClick={() => setScreen('modeSelect')} className="btn-comic btn-comic-blue py-3 w-full mt-6">{t.continue}</button>
                 </div>
+                </>
             )}
 
         </div>

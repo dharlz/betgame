@@ -32,7 +32,7 @@
         background-attachment: fixed;
         background-blend-mode: screen;
         color: white;
-        font-family: 'Roboto', sans-serif;
+        font-family: 'Lilita One', cursive;
         overflow-x: hidden;
         cursor: default;
         position: relative;
@@ -88,58 +88,109 @@
         100% { opacity: 0.8; }
       }
 
-      /* Comic Font Classes */
-      .font-comic { font-family: 'Press Start 2P', cursive; letter-spacing: 1px; }
+      /* Modern Font Classes */
+      .font-comic { font-family: 'Lilita One', cursive; letter-spacing: 1px; }
       
       /* Responsive Base Sizes */
       html { font-size: 16px; }
       @media (min-width: 640px) { html { font-size: 18px; } }
       @media (min-width: 1024px) { html { font-size: 20px; } }
       
-      /* --- COMIC BUTTONS (Like the reference image) --- */
+      /* --- NEON GLOW BUTTONS (Space City Style) --- */
       .btn-comic {
-        background: linear-gradient(180deg, #ffcc00 0%, #ff9900 100%);
-        border: 4px solid black;
-        border-radius: 8px;
-        color: black;
-        font-family: 'Bangers', cursive;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        border: 3px solid transparent;
+        border-radius: 12px;
+        background-clip: padding-box;
+        font-family: 'Lilita One', cursive;
+        font-weight: 800;
         font-size: clamp(1.5rem, 4vw, 2.5rem);
         padding: 0.8rem 1.5rem;
-        text-shadow: 2px 2px 0px rgba(255,255,255,0.4);
-        box-shadow: 6px 6px 0px rgba(0,0,0,0.8), 0 0 15px rgba(255,204,0,0.5);
-        transition: transform 0.1s, box-shadow 0.1s;
+        transition: all 0.3s ease;
         text-transform: uppercase;
         position: relative;
-        overflow: hidden;
+        overflow: visible;
+        background-image: 
+          linear-gradient(135deg, #1a1a2e 0%, #16213e 100%),
+          linear-gradient(135deg, #ffd700, #ff8c00);
+        background-origin: border-box;
+        background-clip: padding-box, border-box;
+        box-shadow: 
+          0 0 20px rgba(255, 215, 0, 0.5),
+          0 0 40px rgba(255, 140, 0, 0.3),
+          inset 0 0 20px rgba(255, 215, 0, 0.1);
       }
       
-      .btn-comic::after {
+      .btn-comic::before {
         content: '';
         position: absolute;
-        top: 0; left: 0; right: 0; height: 50%;
-        background: rgba(255,255,255,0.2);
-        pointer-events: none;
+        inset: -3px;
+        border-radius: 12px;
+        padding: 3px;
+        background: linear-gradient(135deg, #ffd700, #ff8c00, #ffd700);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        z-index: -1;
+        animation: borderGlow 3s linear infinite;
       }
-
+      
+      @keyframes borderGlow {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+      }
+      
+      .btn-comic span,
+      .btn-comic {
+        color: #FFFFFF;
+      }
+      
       .btn-comic:active:not(:disabled) {
-        transform: translate(4px, 4px);
-        box-shadow: 2px 2px 0px rgba(0,0,0,0.8), 0 0 10px rgba(255,204,0,0.3);
+        transform: scale(0.95);
+        box-shadow: 
+          0 0 15px rgba(255, 215, 0, 0.6),
+          0 0 30px rgba(255, 140, 0, 0.4),
+          inset 0 0 15px rgba(255, 215, 0, 0.2);
       }
       
       .btn-comic:hover:not(:disabled) {
-        filter: brightness(1.1);
-        box-shadow: 6px 6px 0px rgba(0,0,0,0.8), 0 0 20px rgba(255,204,0,0.7);
+        box-shadow: 
+          0 0 30px rgba(255, 215, 0, 0.8),
+          0 0 60px rgba(255, 140, 0, 0.5),
+          0 0 80px rgba(255, 215, 0, 0.3),
+          inset 0 0 25px rgba(255, 215, 0, 0.15);
+        transform: translateY(-2px);
       }
 
       .btn-comic-blue {
-        background: linear-gradient(180deg, #33ccff 0%, #0088cc 100%);
-        color: white;
-        text-shadow: 2px 2px 0px #000;
-        box-shadow: 6px 6px 0px rgba(0,0,0,0.8), 0 0 15px rgba(51,204,255,0.5);
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        background-image: 
+          linear-gradient(135deg, #1a1a2e 0%, #16213e 100%),
+          linear-gradient(135deg, #00d4ff, #0088ff);
+        background-origin: border-box;
+        background-clip: padding-box, border-box;
+        box-shadow: 
+          0 0 20px rgba(0, 212, 255, 0.5),
+          0 0 40px rgba(0, 136, 255, 0.3),
+          inset 0 0 20px rgba(0, 212, 255, 0.1);
+      }
+      
+      .btn-comic-blue::before {
+        background: linear-gradient(135deg, #00d4ff, #0088ff, #00d4ff);
+      }
+      
+      .btn-comic-blue span,
+      .btn-comic-blue {
+        color: #FFFFFF;
       }
       
       .btn-comic-blue:hover:not(:disabled) {
-        box-shadow: 6px 6px 0px rgba(0,0,0,0.8), 0 0 20px rgba(51,204,255,0.7);
+        box-shadow: 
+          0 0 30px rgba(0, 212, 255, 0.8),
+          0 0 60px rgba(0, 136, 255, 0.5),
+          0 0 80px rgba(0, 212, 255, 0.3),
+          inset 0 0 25px rgba(0, 212, 255, 0.15);
+        transform: translateY(-2px);
       }
       
       .btn-comic:disabled {
@@ -155,7 +206,8 @@
         background: white;
         border: 4px solid black;
         box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
-        font-family: 'Bangers', cursive;
+        font-family: 'Lilita One', cursive;
+        font-weight: 600;
         font-size: clamp(1.5rem, 4vw, 2.2rem);
         color: black;
         padding: 1rem 1.5rem;
@@ -213,7 +265,8 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        font-family: 'Bangers', cursive;
+        font-family: 'Lilita One', cursive;
+        font-weight: 900;
         font-size: clamp(2.5rem, 5vw, 4rem);
         color: white;
         text-shadow: 2px 2px 0 #000;
@@ -257,10 +310,10 @@
         .face-pink   { transform: rotateX(-90deg) translateZ(90px); }
       }
 
-      /* --- TEXT STYLES --- */
+      /* --- NEON TEXT STYLES --- */
       .title-night-market {
-        font-family: 'Bangers', cursive;
-        color: #ffcc00;
+        font-family: 'Lilita One', cursive;
+        font-weight: 900;
         text-align: center;
         line-height: 0.9;
         margin-bottom: 1rem;
@@ -269,14 +322,21 @@
       }
       
       .title-bet-header {
-        font-size: clamp(2rem, 8vw, 4rem);
-        color: #ffffff;
-        text-shadow: 
-            3px 3px 0px #000,
-            0 0 15px rgba(255,255,255,0.8);
-        animation: glow 2s ease-in-out infinite alternate;
+        font-size: clamp(5rem, 18vw, 10rem);
+        color: #FFFFFF;
         display: block;
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        font-weight: 900;
+        white-space: nowrap;
+        text-shadow: 
+          4px 4px 0px #000,
+          -2px -2px 0px #000,
+          2px -2px 0px #000,
+          -2px 2px 0px #000,
+          6px 6px 12px rgba(0, 0, 0, 0.9);
       }
       
       .title-split-container {
@@ -315,10 +375,11 @@
       }
       
       .panel-comic {
-        background: rgba(0,0,0,0.9);
-        border: 4px solid #ffcc00;
+        background: rgba(0,0,0,0.2);
+        backdrop-filter: blur(15px);
+        border: 2px solid rgba(255, 204, 0, 0.3);
         border-radius: 12px;
-        box-shadow: 0 0 0 4px black, 10px 10px 0 rgba(0,0,0,0.5), 0 0 25px rgba(255,204,0,0.6);
+        box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 8px 32px rgba(0,0,0,0.4);
         position: relative;
       }
 
@@ -479,7 +540,8 @@
 
       .comic-pow {
         position: absolute;
-        font-family: 'Bangers', cursive;
+        font-family: 'Lilita One', cursive;
+        font-weight: 900;
         font-size: clamp(3rem, 8vw, 5rem);
         color: #ff3333;
         text-shadow: 2px 2px 0 #fff, 4px 4px 0 #000;
