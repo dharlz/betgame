@@ -231,15 +231,340 @@ const App = () => {
     // Player 2 State
     const [player2SelectedColor, setPlayer2SelectedColor] = useState(null);
     const [player2LastResult, setPlayer2LastResult] = useState(null);
-    const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+    
+    // Audio Controls
+    const [isMusicEnabled, setIsMusicEnabled] = useState(true);
+    const [isSoundEnabled, setIsSoundEnabled] = useState(true);
 
     const t = STRINGS[lang];
 
     // Sound effects and music
-    const playDiceSound = () => {
-        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZRQ0PVantx49UEAhDmty0pWQcBjSJ1PTNfS4FKHzL8N2RQQwUYLft6KdWFApIouHyvnAhBTKJ0vTUhzQGH2/A8OScRw0PVqvuyJNWEAlEnN60pWYdBzOJ1vXOgC4FKX7M8N+SSAMUYrju6apaFgpJpOL0wHIjBjOL0/XXijYHIG/C8eWhSg4PWKzwyZRYEQpGnuC1p2kdCDSL1/XPgy4FKoHN8eGUSwMVY7nv6q1bFwpLpuP0wnQkBzSM1PbYjDcHIXHD8uekTA8QWq7xypdaEwpIoOG2qGoeCD');
-        audio.volume = 0.3;
-        audio.play().catch(() => {});
+    const soundEffects = useRef({
+        diceRoll: null,
+        win: null,
+        lose: null,
+        click: null,
+        bonus: null
+    });
+    
+    const audioContext = useRef(null);
+    const musicGainNode = useRef(null);
+    const musicOscillators = useRef([]);
+    const musicLoopTimeout = useRef(null);
+
+    // Initialize sound effects
+    useEffect(() => {
+        // Initialize Audio Context
+        audioContext.current = new (window.AudioContext || window.webkitAudioContext)();
+        musicGainNode.current = audioContext.current.createGain();
+        musicGainNode.current.connect(audioContext.current.destination);
+        musicGainNode.current.gain.value = 0.25; // Start higher by default
+        
+        // Dice rolling sound - synthesized for reliability
+        soundEffects.current.diceRoll = () => {
+            const ctx = audioContext.current;
+            const now = ctx.currentTime;
+            
+            // Create realistic dice rolling with rattling sounds
+            const numRattles = 15;
+            for (let i = 0; i < numRattles; i++) {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                // Random frequencies for realistic dice tumbling
+                const freq = 80 + Math.random() * 150;
+                osc.frequency.value = freq;
+                osc.type = 'square';
+                
+                const startTime = now + (i * 0.06);
+                const duration = 0.04;
+                
+                // Volume decreases as dice settles
+                const volume = 0.25 * (1 - (i / numRattles) * 0.5);
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(volume, startTime + 0.005);
+                gain.gain.linearRampToValueAtTime(0, startTime + duration);
+                
+                osc.start(startTime);
+                osc.stop(startTime + duration);
+            }
+            
+            // Final loud "CLACK" when dice stops
+            setTimeout(() => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 120;
+                osc.type = 'square';
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.2);
+            }, 900);
+        };
+
+        // Win sound (ascending notes)
+        soundEffects.current.win = () => {
+            const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+            notes.forEach((freq, i) => {
+                const osc = audioContext.current.createOscillator();
+                const gain = audioContext.current.createGain();
+                osc.connect(gain);
+                gain.connect(audioContext.current.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.15, audioContext.current.currentTime + i * 0.15);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.current.currentTime + i * 0.15 + 0.3);
+                osc.start(audioContext.current.currentTime + i * 0.15);
+                osc.stop(audioContext.current.currentTime + i * 0.15 + 0.3);
+            });
+        };
+
+        // Lose sound (descending notes)
+        soundEffects.current.lose = () => {
+            const notes = [392.00, 329.63]; // G4, E4
+            notes.forEach((freq, i) => {
+                const osc = audioContext.current.createOscillator();
+                const gain = audioContext.current.createGain();
+                osc.connect(gain);
+                gain.connect(audioContext.current.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.15, audioContext.current.currentTime + i * 0.2);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.current.currentTime + i * 0.2 + 0.4);
+                osc.start(audioContext.current.currentTime + i * 0.2);
+                osc.stop(audioContext.current.currentTime + i * 0.2 + 0.4);
+            });
+        };
+
+        // Bonus sound (special celebratory)
+        soundEffects.current.bonus = () => {
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            notes.forEach((freq, i) => {
+                const osc = audioContext.current.createOscillator();
+                const gain = audioContext.current.createGain();
+                osc.connect(gain);
+                gain.connect(audioContext.current.destination);
+                osc.frequency.value = freq;
+                osc.type = 'square';
+                gain.gain.setValueAtTime(0.12, audioContext.current.currentTime + i * 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.current.currentTime + i * 0.1 + 0.25);
+                osc.start(audioContext.current.currentTime + i * 0.1);
+                osc.stop(audioContext.current.currentTime + i * 0.1 + 0.25);
+            });
+        };
+
+        // Click sound
+        soundEffects.current.click = () => {
+            const osc = audioContext.current.createOscillator();
+            const gain = audioContext.current.createGain();
+            osc.connect(gain);
+            gain.connect(audioContext.current.destination);
+            osc.frequency.value = 800;
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.1, audioContext.current.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.current.currentTime + 0.1);
+            osc.start();
+            osc.stop(audioContext.current.currentTime + 0.1);
+        };
+        
+        return () => {
+            // Cleanup
+            stopBackgroundMusic();
+        };
+    }, []);
+
+    const playSound = (soundType) => {
+        if (!isSoundEnabled) return; // Don't play if sounds are disabled
+        
+        try {
+            // Resume audio context if suspended (browser autoplay policy)
+            if (audioContext.current && audioContext.current.state === 'suspended') {
+                audioContext.current.resume();
+            }
+            
+            if (soundEffects.current[soundType]) {
+                soundEffects.current[soundType]();
+            }
+        } catch (error) {
+            // Silently fail if audio can't play
+            console.log('Audio playback failed:', error);
+        }
+    };
+    
+    // Background Music Functions
+    const startBackgroundMusic = () => {
+        if (!audioContext.current || musicOscillators.current.length > 0) return;
+        
+        try {
+            // Resume audio context if suspended (browser autoplay policy)
+            if (audioContext.current.state === 'suspended') {
+                audioContext.current.resume();
+            }
+            
+            // "Fluffing a Duck" Style - Playful, Bouncy, Silly Melody!
+            // Fun xylophone/marimba-like sound with bouncy rhythm
+            const musicPattern = [
+                // Phrase 1 - Bouncy intro (like bouncing ball)
+                { notes: [523.25], duration: 0.15, delay: 0, type: 'sine' },        // C
+                { notes: [659.25], duration: 0.15, delay: 0.2, type: 'sine' },      // E
+                { notes: [783.99], duration: 0.15, delay: 0.4, type: 'sine' },      // G
+                { notes: [1046.50], duration: 0.25, delay: 0.6, type: 'sine' },     // C6
+                
+                // Phrase 2 - Silly descending
+                { notes: [987.77], duration: 0.15, delay: 0.9, type: 'sine' },      // B
+                { notes: [880.00], duration: 0.15, delay: 1.1, type: 'sine' },      // A
+                { notes: [783.99], duration: 0.2, delay: 1.3, type: 'sine' },       // G
+                
+                // Phrase 3 - Quick playful bounce
+                { notes: [659.25], duration: 0.12, delay: 1.6, type: 'sine' },      // E
+                { notes: [698.46], duration: 0.12, delay: 1.75, type: 'sine' },     // F
+                { notes: [783.99], duration: 0.12, delay: 1.9, type: 'sine' },      // G
+                { notes: [659.25], duration: 0.2, delay: 2.05, type: 'sine' },      // E
+                
+                // Phrase 4 - Fun ascending run
+                { notes: [523.25], duration: 0.12, delay: 2.3, type: 'sine' },      // C
+                { notes: [587.33], duration: 0.12, delay: 2.45, type: 'sine' },     // D
+                { notes: [659.25], duration: 0.12, delay: 2.6, type: 'sine' },      // E
+                { notes: [698.46], duration: 0.12, delay: 2.75, type: 'sine' },     // F
+                { notes: [783.99], duration: 0.25, delay: 2.9, type: 'sine' },      // G
+                
+                // Phrase 5 - Repeat main bouncy theme
+                { notes: [523.25], duration: 0.15, delay: 3.3, type: 'sine' },      // C
+                { notes: [659.25], duration: 0.15, delay: 3.5, type: 'sine' },      // E
+                { notes: [783.99], duration: 0.15, delay: 3.7, type: 'sine' },      // G
+                { notes: [1046.50], duration: 0.25, delay: 3.9, type: 'sine' },     // C6
+                
+                // Phrase 6 - Silly ending wiggle
+                { notes: [783.99], duration: 0.15, delay: 4.25, type: 'sine' },     // G
+                { notes: [659.25], duration: 0.15, delay: 4.45, type: 'sine' },     // E
+                { notes: [783.99], duration: 0.15, delay: 4.65, type: 'sine' },     // G
+                { notes: [659.25], duration: 0.15, delay: 4.85, type: 'sine' },     // E
+                { notes: [523.25], duration: 0.3, delay: 5.05, type: 'sine' },      // C (held)
+            ];
+            
+            const patternDuration = 5.5; // Quick loop for continuous fun
+            
+            const playPattern = (startTime) => {
+                musicPattern.forEach(pattern => {
+                    pattern.notes.forEach((freq, index) => {
+                        const osc = audioContext.current.createOscillator();
+                        const noteGain = audioContext.current.createGain();
+                        
+                        osc.connect(noteGain);
+                        noteGain.connect(musicGainNode.current);
+                        
+                        osc.frequency.value = freq;
+                        osc.type = pattern.type || 'sine'; // Bright sine for xylophone/marimba feel
+                        
+                        const noteStart = startTime + pattern.delay;
+                        const noteEnd = noteStart + pattern.duration;
+                        
+                        // Plucky envelope like xylophone/marimba
+                        const baseVolume = 0.12;
+                        noteGain.gain.setValueAtTime(0, noteStart);
+                        noteGain.gain.linearRampToValueAtTime(baseVolume, noteStart + 0.01); // Fast attack
+                        noteGain.gain.exponentialRampToValueAtTime(0.01, noteEnd); // Natural decay
+                        
+                        osc.start(noteStart);
+                        osc.stop(noteEnd);
+                        
+                        musicOscillators.current.push(osc);
+                    });
+                });
+            };
+            
+            // Play initial pattern
+            playPattern(audioContext.current.currentTime);
+            
+            // Loop the pattern
+            const loopMusic = () => {
+                if (isMusicEnabled && audioContext.current) {
+                    playPattern(audioContext.current.currentTime);
+                    musicLoopTimeout.current = setTimeout(loopMusic, patternDuration * 1000);
+                }
+            };
+            
+            musicLoopTimeout.current = setTimeout(loopMusic, patternDuration * 1000);
+            
+        } catch (error) {
+            console.log('Background music failed:', error);
+        }
+    };
+    
+    const stopBackgroundMusic = () => {
+        // Clear the loop timeout
+        if (musicLoopTimeout.current) {
+            clearTimeout(musicLoopTimeout.current);
+            musicLoopTimeout.current = null;
+        }
+        
+        // Stop all oscillators
+        musicOscillators.current.forEach(osc => {
+            try {
+                osc.stop();
+            } catch (e) {
+                // Already stopped
+            }
+        });
+        musicOscillators.current = [];
+    };
+    
+    // Handle music toggle
+    useEffect(() => {
+        if (isMusicEnabled) {
+            startBackgroundMusic();
+        } else {
+            stopBackgroundMusic();
+        }
+    }, [isMusicEnabled]);
+
+    const toggleMusic = () => {
+        setIsMusicEnabled(!isMusicEnabled);
+    };
+    
+    const toggleSound = () => {
+        setIsSoundEnabled(!isSoundEnabled);
+    };
+
+    // Dynamic music volume adjustment
+    const adjustMusicVolume = (volume, fadeDuration = 0.3) => {
+        if (musicGainNode.current && audioContext.current) {
+            const now = audioContext.current.currentTime;
+            musicGainNode.current.gain.cancelScheduledValues(now);
+            musicGainNode.current.gain.setValueAtTime(musicGainNode.current.gain.value, now);
+            musicGainNode.current.gain.linearRampToValueAtTime(volume, now + fadeDuration);
+        }
+    };
+
+    // Adjust music volume based on game state
+    useEffect(() => {
+        if (!isMusicEnabled) return;
+        
+        if (isRolling) {
+            // Lower volume during dice roll
+            adjustMusicVolume(0.08);
+        } else if (screen === 'game' && lastResult === null && selectedColor) {
+            // Higher volume when player is choosing/ready
+            adjustMusicVolume(0.28);
+        } else if (screen === 'game') {
+            // Normal volume during gameplay
+            adjustMusicVolume(0.2);
+        } else {
+            // Lower volume on menu/other screens
+            adjustMusicVolume(0.15);
+        }
+    }, [isRolling, screen, lastResult, selectedColor, isMusicEnabled]);
+
+    // Helper to wrap onClick with sound
+    const withClickSound = (callback) => {
+        return () => {
+            playSound('click');
+            callback();
+        };
     };
 
     // Keyboard controls for Player 2 (Two-player mode)
@@ -265,16 +590,13 @@ const App = () => {
         return () => window.removeEventListener('keydown', handleKeyPress);
     }, [gameMode, screen, isRolling, lastResult]);
 
-    // Background music toggle
-    const toggleMusic = () => {
-        setIsMusicPlaying(!isMusicPlaying);
-    };
-
     const handleStart = () => {
+        playSound('click');
         setScreen('whatIsGame'); // Show "What is this game?" explanation first
     };
     
     const selectMode = (mode) => {
+        playSound('click');
         setGameMode(mode);
         if (mode === 'twoplayer') {
             setScreen('twoPlayerTutorial');
@@ -286,6 +608,7 @@ const App = () => {
     const startGame = () => {
         if(!name.trim()) return;
         if(gameMode === 'twoplayer' && !player2Name.trim()) return;
+        playSound('click');
         setScreen('game');
         setRound(1);
         setWins(0);
@@ -340,7 +663,7 @@ const App = () => {
         setTargetRoll(result);
         setIsRolling(true);
         setPowText(null);
-        playDiceSound();
+        playSound('diceRoll');
 
         setTimeout(() => {
             setIsRolling(false);
@@ -353,12 +676,15 @@ const App = () => {
                 if(isBonusRound) {
                     setPowText(t.bonusWin);
                     setBonusWon(true);
+                    playSound('bonus');
                 } else {
                     setPowText(t.win);
+                    playSound('win');
                 }
             } else {
                 setLastResult('lose');
                 setPowText(t.lose);
+                playSound('lose');
             }
             
             // Check AI result if in AI mode
@@ -384,6 +710,7 @@ const App = () => {
     };
 
     const nextRound = () => {
+        playSound('click');
         if(round < 3) {
             setRound(r => r + 1);
             resetRound();
@@ -398,6 +725,7 @@ const App = () => {
     };
 
     const restart = () => {
+        playSound('click');
         setScreen('menu'); // Return to menu
         setName('');
         setPlayer2Name('');
@@ -406,6 +734,43 @@ const App = () => {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center relative p-4 overflow-hidden">
+            
+            {/* Audio Controls - Fixed Position */}
+            <div className="fixed bottom-4 left-4 z-50 flex gap-2">
+                <button 
+                    onClick={toggleMusic}
+                    className="w-12 h-12 rounded-full flex items-center justify-center text-2xl transition-all"
+                    style={{
+                        background: isMusicEnabled 
+                            ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                            : 'rgba(0,0,0,0.5)',
+                        border: '2px solid rgba(255,255,255,0.3)',
+                        boxShadow: isMusicEnabled 
+                            ? '0 4px 15px rgba(102, 126, 234, 0.4)'
+                            : '0 2px 8px rgba(0,0,0,0.3)'
+                    }}
+                    title={isMusicEnabled ? 'Music On' : 'Music Off'}
+                >
+                    {isMusicEnabled ? '🎵' : '🔇'}
+                </button>
+                
+                <button 
+                    onClick={toggleSound}
+                    className="w-12 h-12 rounded-full flex items-center justify-center text-2xl transition-all"
+                    style={{
+                        background: isSoundEnabled 
+                            ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+                            : 'rgba(0,0,0,0.5)',
+                        border: '2px solid rgba(255,255,255,0.3)',
+                        boxShadow: isSoundEnabled 
+                            ? '0 4px 15px rgba(240, 147, 251, 0.4)'
+                            : '0 2px 8px rgba(0,0,0,0.3)'
+                    }}
+                    title={isSoundEnabled ? 'Sound FX On' : 'Sound FX Off'}
+                >
+                    {isSoundEnabled ? '🔊' : '🔈'}
+                </button>
+            </div>
             
             {/* Night Market Background - Always visible */}
             <div className="absolute inset-0 pointer-events-none">
@@ -882,7 +1247,10 @@ const App = () => {
                                         {COLORS.map(c => (
                                             <button 
                                                 key={c}
-                                                onClick={() => setSelectedColor(c)}
+                                                onClick={() => {
+                                                    playSound('click');
+                                                    setSelectedColor(c);
+                                                }}
                                                 className={`swatch h-20 md:h-24 ${COLOR_BG[c]} ${selectedColor === c ? 'selected' : ''}`}
                                             ></button>
                                         ))}
@@ -897,7 +1265,10 @@ const App = () => {
                                             {COLORS.map(c => (
                                                 <button 
                                                     key={c}
-                                                    onClick={() => setPlayer2SelectedColor(c)}
+                                                    onClick={() => {
+                                                        playSound('click');
+                                                        setPlayer2SelectedColor(c);
+                                                    }}
                                                     className={`swatch h-20 md:h-24 ${COLOR_BG[c]} ${player2SelectedColor === c ? 'selected' : ''}`}
                                                 ></button>
                                             ))}

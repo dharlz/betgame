@@ -579,3 +579,39 @@
       .animate-sway {
         animation: sway 2s ease-in-out infinite;
       }
+
+      /* Audio Control Buttons */
+      .fixed.bottom-4.left-4 button {
+        cursor: pointer;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        user-select: none;
+      }
+
+      .fixed.bottom-4.left-4 button:hover {
+        transform: scale(1.1) translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3) !important;
+      }
+
+      .fixed.bottom-4.left-4 button:active {
+        transform: scale(0.95);
+      }
+
+      @keyframes pulse-music {
+        0%, 100% { 
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        50% { 
+          box-shadow: 0 4px 25px rgba(102, 126, 234, 0.7);
+        }
+      }
+
+      @keyframes pulse-sound {
+        0%, 100% { 
+          box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+        }
+        50% { 
+          box-shadow: 0 4px 25px rgba(240, 147, 251, 0.7);
+        }
+      }
